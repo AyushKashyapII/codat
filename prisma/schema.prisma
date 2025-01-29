@@ -1,0 +1,74 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Codat {
+  codatId          String  @id @default(uuid())
+  codatName        String
+  codatDescription String
+  codatAuthor      User    @relation("CodatAuthor", fields: [codatId], references: [userId],onDelete: Cascade)
+  codatCode        String
+  codatLanguage    String
+  codatIsPublic    Boolean @default(true)
+  codatAIDesc      String
+  codatAIFunc      String
+  codatsSavedBy    User[]  @relation("CodatSaved")
+  codatTeamsPartOf Teams[] @relation("TeamCodats")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([codatId])
+  @@index([codatIsPublic])
+}
+
+model Teams {
+  teamId         String  @id @default(uuid())
+  teamName       String
+  teamMembers    User[]  @relation("TeamMembers")
+  teamOwnerId    String
+  teamOwner      User    @relation("TeamOwner", fields: [teamOwnerId], references: [userId],onDelete: Cascade)
+  teamModerators User[]  @relation("TeamModerators")
+  teamCodats     Codat[] @relation("TeamCodats")
+
+  @@index([teamId])
+  @@index([teamOwnerId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
+model User {
+  userId             String      @id @default(uuid())
+  email              String      @unique
+  phoneNumber        String?     @unique
+  name               String?     @default("Codat User")
+  attachedAiSearcher AiSearcher? @relation("AiSearcher")
+  teamsPartsOf       Teams[]     @relation("TeamMembers")
+  teamsOwnerOf       Teams[]     @relation("TeamOwner")
+  teamsModeratorOf   Teams[]     @relation("TeamModerators")
+  codatsAuthored     Codat[]     @relation("CodatAuthor")
+  codatsSaved        Codat[]     @relation("CodatSaved")
+
+  @@index([userId])
+}
+
+model AiSearcher {
+  aiId           String @id @default(uuid())
+  attachedUserId User   @relation("AiSearcher", fields: [aiId], references: [userId],onDelete: Cascade)
+  textToPassToAI String
+
+  @@index([aiId])
+}
