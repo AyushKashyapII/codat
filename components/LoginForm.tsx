@@ -33,8 +33,8 @@ const LoginForm = () => {
           letterSpacing: '1px',
           position: 'relative',
         }}
-        onMouseEnter={(e) => e.target.style.background = 'linear-gradient(145deg, #c1351d, #db4437)'} // Change gradient on hover
-        onMouseLeave={(e) => e.target.style.background = 'linear-gradient(145deg, #db4437, #c1351d)'}
+        onMouseEnter={(e) => (e.target as HTMLButtonElement).style.background = 'linear-gradient(145deg, #c1351d, #db4437)'} // Change gradient on hover
+        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = 'linear-gradient(145deg, #db4437, #c1351d)'}
       >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1024px-Google_%22G%22_logo.svg.png"
@@ -77,8 +77,8 @@ const LoginForm = () => {
           letterSpacing: '1px',
           position: 'relative',
         }}
-        onMouseEnter={(e) => e.target.style.background = 'linear-gradient(145deg, #444, #333)'} // Change gradient on hover
-        onMouseLeave={(e) => e.target.style.background = 'linear-gradient(145deg, #333, #444)'}
+        onMouseEnter={(e) => (e.target as HTMLButtonElement) .style.background = 'linear-gradient(145deg, #444, #333)'} // Change gradient on hover
+        onMouseLeave={(e) => (e.target as HTMLButtonElement).style.background = 'linear-gradient(145deg, #333, #444)'}
       >
         <img
           src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg"

@@ -1,8 +1,8 @@
-'use server'
+'use client'
 
 import { signIn } from 'next-auth/react';
 
-export async function socialLogin(formData: FormData) {
+export async function socialLogin(formData:FormData) {
   const action = formData.get('action');
 
   if (typeof action !== 'string') {
