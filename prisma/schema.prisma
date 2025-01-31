@@ -25,6 +25,7 @@ model Codat {
   codatAIFunc      String
   codatsSavedBy    User[]  @relation("CodatSaved")
   codatTeamsPartOf Teams[] @relation("TeamCodats")
+  codatsCollectionPartOf Collections[] @relation("CollectionCodats")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -50,6 +51,21 @@ model Teams {
 
 }
 
+model Collections {
+  collectionId   String  @id @default(uuid())
+  collectionName String
+  collectionDesc String
+  collectionOwner User @relation("CollectionOwner", fields: [collectionOwnerId], references: [userId],onDelete: Cascade)
+  collectionOwnerId String
+  collectionCodats Codat[] @relation("CollectionCodats")
+
+  @@index([collectionId])
+  @@index([collectionOwnerId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model User {
   userId             String      @id @default(uuid())
   email              String      @unique
@@ -60,8 +76,8 @@ model User {
   teamsOwnerOf       Teams[]     @relation("TeamOwner")
   teamsModeratorOf   Teams[]     @relation("TeamModerators")
   codatsAuthored     Codat[]     @relation("CodatAuthor")
-  codatsSaved        Codat[]     @relation("CodatSaved")
-
+  codatsSaved        Codat[]       @relation("CodatSaved")
+  codatsCollections  Collections[] @relation("CollectionOwner")
   @@index([userId])
 }
 
