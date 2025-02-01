@@ -17,7 +17,8 @@ model Codat {
   codatId          String  @id @default(uuid())
   codatName        String
   codatDescription String
-  codatAuthor      User    @relation("CodatAuthor", fields: [codatId], references: [userId],onDelete: Cascade)
+  codatAuthor      User    @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId         String
   codatCode        String
   codatLanguage    String
   codatIsPublic    Boolean @default(true)
@@ -39,7 +40,7 @@ model Teams {
   teamName       String
   teamMembers    User[]  @relation("TeamMembers")
   teamOwnerId    String
-  teamOwner      User    @relation("TeamOwner", fields: [teamOwnerId], references: [userId],onDelete: Cascade)
+  teamOwner      User    @relation("TeamOwner", fields: [teamOwnerId], references: [id],onDelete: Cascade)
   teamModerators User[]  @relation("TeamModerators")
   teamCodats     Codat[] @relation("TeamCodats")
 
@@ -55,7 +56,7 @@ model Collections {
   collectionId   String  @id @default(uuid())
   collectionName String
   collectionDesc String
-  collectionOwner User @relation("CollectionOwner", fields: [collectionOwnerId], references: [userId],onDelete: Cascade)
+  collectionOwner User @relation("CollectionOwner", fields: [collectionOwnerId], references: [id],onDelete: Cascade)
   collectionOwnerId String
   collectionCodats Codat[] @relation("CollectionCodats")
 
@@ -67,7 +68,7 @@ model Collections {
 }
 
 model User {
-  userId             String      @id @default(uuid())
+  id             String      @id @default(uuid())
   email              String      @unique
   phoneNumber        String?     @unique
   name               String?     @default("Codat User")
@@ -78,13 +79,14 @@ model User {
   codatsAuthored     Codat[]     @relation("CodatAuthor")
   codatsSaved        Codat[]       @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
-  @@index([userId])
+  @@index([id])
 }
 
 model AiSearcher {
   aiId           String @id @default(uuid())
-  attachedUserId User   @relation("AiSearcher", fields: [aiId], references: [userId],onDelete: Cascade)
-  textToPassToAI String
+  attachedUser   User   @relation("AiSearcher", fields: [attachedUserId], references: [id],onDelete: Cascade)
+  attachedUserId String @unique
+  textToPassToAI Json   @default("[]")
 
   @@index([aiId])
 }
