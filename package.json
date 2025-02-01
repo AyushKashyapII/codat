@@ -12,6 +12,7 @@
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.7.4",
     "@langchain/google-genai": "^0.1.8",
     "@prisma/client": "^6.3.0",
     "@qdrant/js-client-rest": "^1.13.0",
