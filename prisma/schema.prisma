@@ -112,6 +112,7 @@ model User {
   phoneNumber        String?     @unique
   name               String?     @default("Codat User")
   password           String?
+  image              String?     @db.Text
   attachedAiSearcher AiSearcher? @relation("AiSearcher")
   teamsPartsOf       Teams[]     @relation("TeamMembers")
   teamsOwnerOf       Teams[]     @relation("TeamOwner")
