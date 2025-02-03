@@ -3,25 +3,29 @@ import { db } from '@/lib/db';
 import { aiDesc } from '@/lib/codatAIDescription';
 import { aiFunc } from '@/lib/codatAIFunction';
 import { qdrantStore } from '@/lib/qdrantStore';
+import { currentProfile } from '@/lib/current-profile';
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    const userId = session.user.id;
-    const currentUser = await db.user.findUnique({
-        where: {
-            id: userId,
-        },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            phoneNumber: true,
-            attachedAiSearcher: true,
-        },
-    });
+    
+    // const session = await getServerSession(authOptions);
+    // if (!session) {
+    //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // }
+    // const userId = session.user.id;
+    // const currentUser = await db.profile.findUnique({
+    //     where: {
+    //         id: userId,
+    //     },
+    //     select: {
+    //         id: true,
+    //         name: true,
+    //         email: true,
+    //         phoneNumber: true,
+    //         attachedAiSearcher: true,
+    //     },
+    // });
+
+    const currentUser = await currentProfile();
 
     if (!currentUser) {
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -32,12 +36,12 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
     }
 
-    if (!currentUser || !session) {
+    if (!currentUser.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const aiDescritpion = await aiDesc(code, language, session.user.name) || '';
-    const aiFunction = await aiFunc(code, language, session.user.name) || '';
+    const aiDescritpion = await aiDesc(code, language, currentUser.name || " ") || '';
+    const aiFunction = await aiFunc(code, language, currentUser.name || " ") || '';
     
     const codat = await db.codat.create({
         data: {
@@ -46,7 +50,7 @@ export async function POST(req: Request) {
         codatLanguage: language,
         codatAuthor: {
             connect: {
-            id: userId,
+            id: currentUser.id,
             },
         },
         codatDescription: description,
@@ -58,7 +62,7 @@ export async function POST(req: Request) {
 
     const aiSearcherData = await db.aiSearcher.findUnique({
         where: {
-            attachedUserId: userId
+            attachedProfileId: currentUser.id
         },
         select: {
             textToPassToAI: true
@@ -69,7 +73,7 @@ export async function POST(req: Request) {
 
     const aiSearcher = await db.aiSearcher.update({
         where: {
-            attachedUserId: userId
+            attachedProfileId: currentUser.id
         },
 
         data: {
