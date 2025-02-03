@@ -17,14 +17,14 @@ model Codat {
   codatId          String  @id @default(uuid())
   codatName        String
   codatDescription String
-  codatAuthor      User    @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  codatAuthor      Profile    @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   authorId         String
   codatCode        String
   codatLanguage    String
   codatIsPublic    Boolean @default(true)
   codatAIDesc      String
   codatAIFunc      String
-  codatsSavedBy    User[]  @relation("CodatSaved")
+  codatsSavedBy    Profile[]  @relation("CodatSaved")
   codatTeamsPartOf Teams[] @relation("TeamCodats")
   codatsCollectionPartOf Collections[] @relation("CollectionCodats")
 
@@ -35,52 +35,13 @@ model Codat {
   @@index([codatIsPublic])
 }
 
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
- 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  @@id([provider, providerAccountId])
-}
-
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
- 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
- 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
- 
-  @@id([identifier, token])
-}
-
 model Teams {
   teamId         String  @id @default(uuid())
   teamName       String
-  teamMembers    User[]  @relation("TeamMembers")
+  teamMembers    Profile[]  @relation("TeamMembers")
   teamOwnerId    String
-  teamOwner      User    @relation("TeamOwner", fields: [teamOwnerId], references: [id],onDelete: Cascade)
-  teamModerators User[]  @relation("TeamModerators")
+  teamOwner      Profile    @relation("TeamOwner", fields: [teamOwnerId], references: [id],onDelete: Cascade)
+  teamModerators Profile[]  @relation("TeamModerators")
   teamCodats     Codat[] @relation("TeamCodats")
 
   @@index([teamId])
@@ -95,7 +56,7 @@ model Collections {
   collectionId   String  @id @default(uuid())
   collectionName String
   collectionDesc String
-  collectionOwner User @relation("CollectionOwner", fields: [collectionOwnerId], references: [id],onDelete: Cascade)
+  collectionOwner Profile @relation("CollectionOwner", fields: [collectionOwnerId], references: [id],onDelete: Cascade)
   collectionOwnerId String
   collectionCodats Codat[] @relation("CollectionCodats")
 
@@ -106,11 +67,11 @@ model Collections {
   updatedAt DateTime @updatedAt
 }
 
-model User {
+model Profile {
   id             String      @id @default(uuid())
   email              String      @unique
   phoneNumber        String?     @unique
-  name               String?     @default("Codat User")
+  name               String?     @default("Codat Profile") @unique
   password           String?
   image              String?     @db.Text
   attachedAiSearcher AiSearcher? @relation("AiSearcher")
@@ -120,17 +81,14 @@ model User {
   codatsAuthored     Codat[]     @relation("CodatAuthor")
   codatsSaved        Codat[]       @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
-  
-  accounts      Account[] 
-  sessions      Session[]
 
   @@index([id])
 }
 
 model AiSearcher {
   aiId           String @id @default(uuid())
-  attachedUser   User   @relation("AiSearcher", fields: [attachedUserId], references: [id],onDelete: Cascade)
-  attachedUserId String @unique
+  attachedProfile   Profile   @relation("AiSearcher", fields: [attachedProfileId], references: [id],onDelete: Cascade)
+  attachedProfileId String @unique
   textToPassToAI Json   @default("[]")
 
   @@index([aiId])

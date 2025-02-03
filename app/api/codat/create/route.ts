@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/options';
 import { aiDesc } from '@/lib/codatAIDescription';
 import { aiFunc } from '@/lib/codatAIFunction';
 import { qdrantStore } from '@/lib/qdrantStore';
