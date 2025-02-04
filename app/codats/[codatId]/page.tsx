@@ -22,13 +22,16 @@ const CodatPage = () => {
         if (res.status === 200) {
           setCodat(res.data);
         } else {
-          router.push("/");
+          router.back();
         }
       } catch (e) {
         console.error(e);
       }
     }
-  })
+
+    fetchCodat();
+  }, [router, codatId])
+
   if (!codat) {
     return (
       <Loader />

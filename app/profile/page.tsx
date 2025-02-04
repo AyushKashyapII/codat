@@ -1,6 +1,5 @@
 import { currentProfile } from '@/lib/current-profile';
-import { initialProfile } from '@/lib/initial-profile';
-import { UserButton } from '@clerk/nextjs';
+import { initialProfile } from '@/lib/initial-profile';;
 import React from 'react';
 
 const Page = async () => {

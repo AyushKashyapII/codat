@@ -1,10 +1,9 @@
 import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest, { params }: { params: { username: string } }) {
-  console.log('Fetching profile for:', params.username);
-
-  const { username } = params;
+export async function GET(req: NextRequest, { params }: { params: Promise<{ username: string }> }) {
+  console.log('Fetching profile for:', );
+  const { username } = await params;
 
   if (!username) {
     return NextResponse.json({ error: 'Invalid username parameter' }, { status: 400 });

@@ -25,6 +25,3 @@
 .animate-slide-in-bottom { animation: slideInBottom 1s ease-out; }
 .animate-fade-in { animation: fadeIn 0.8s ease-out; }
 .animate-bounce-in { animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-
-/*.animate-cursor { animation: blink 1s steps(2, start) infinite; }*/
-/*@keyframes blink { to { opacity: 0; } }*/
