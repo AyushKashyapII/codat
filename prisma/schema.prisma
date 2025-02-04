@@ -14,85 +14,84 @@ datasource db {
 }
 
 model Codat {
-  codatId          String  @id @default(uuid())
-  codatName        String
-  codatDescription String
-  codatAuthor      Profile    @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  authorId         String
-  codatCode        String
-  codatLanguage    String
-  codatIsPublic    Boolean @default(true)
-  codatAIDesc      String
-  codatAIFunc      String
-  codatsSavedBy    Profile[]  @relation("CodatSaved")
-  codatTeamsPartOf Teams[] @relation("TeamCodats")
-  codatsCollectionPartOf Collections @relation("CollectionCodats", fields: [codatId], references: [collectionId])
+  codatId             String      @id @default(uuid())
+  codatName           String
+  codatDescription    String
+  codatAuthor         Profile     @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId            String
+  codatCode           String      @db.Text
+  codatLanguage       String      @db.VarChar(50)
+  codatIsPublic       Boolean     @default(true)
+  codatAIDesc         String
+  codatAIFunc         String
+  codatsSavedBy       Profile[]   @relation("CodatSaved")
+  codatTeamsPartOf    Teams[]     @relation("TeamCodats")
+  codatsCollectionPartOf Collections? @relation("CollectionCodats", fields: [collectionId], references: [collectionId])
+  collectionId        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([codatId])
-  @@index([codatIsPublic])
+  @@index([authorId, codatIsPublic])
+  @@index([collectionId, createdAt])
 }
 
 model Teams {
-  teamId         String  @id @default(uuid())
+  teamId         String    @id @default(uuid())
   teamName       String
-  teamMembers    Profile[]  @relation("TeamMembers")
+  teamMembers    Profile[] @relation("TeamMembers")
   teamOwnerId    String
-  teamOwner      Profile    @relation("TeamOwner", fields: [teamOwnerId], references: [id],onDelete: Cascade)
-  teamModerators Profile[]  @relation("TeamModerators")
-  teamCodats     Codat[] @relation("TeamCodats")
+  teamOwner      Profile   @relation("TeamOwner", fields: [teamOwnerId], references: [id], onDelete: Cascade)
+  teamModerators Profile[] @relation("TeamModerators")
+  teamCodats     Codat[]   @relation("TeamCodats")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([teamId])
   @@index([teamOwnerId])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
 }
 
 model Collections {
-  collectionId   String  @id @default(uuid())
-  collectionName String
-  collectionDesc String
-  collectionOwner Profile @relation("CollectionOwner", fields: [collectionOwnerId], references: [id],onDelete: Cascade)
-  collectionOwnerId String
-  collectionCodats Codat[] @relation("CollectionCodats")
-
-  @@index([collectionId])
-  @@index([collectionOwnerId])
+  collectionId       String   @id @default(uuid())
+  collectionName     String
+  collectionDesc     String
+  collectionOwner    Profile  @relation("CollectionOwner", fields: [collectionOwnerId], references: [id], onDelete: Cascade)
+  collectionOwnerId  String
+  collectionCodats   Codat[]  @relation("CollectionCodats")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([collectionId])
+  @@index([collectionOwnerId])
 }
 
 model Profile {
-  id             String      @id @default(uuid())
-  email              String      @unique
-  phoneNumber        String?     @unique
-  name               String?     @default("Codat Profile") @unique
+  id                 String       @id @default(uuid())
+  email              String       @unique
+  phoneNumber        String?      @unique
+  name               String?      @default("Codat Profile") @unique
   password           String?
-  image              String?     @db.Text
-  attachedAiSearcher AiSearcher? @relation("AiSearcher")
-  teamsPartsOf       Teams[]     @relation("TeamMembers")
-  teamsOwnerOf       Teams[]     @relation("TeamOwner")
-  teamsModeratorOf   Teams[]     @relation("TeamModerators")
-  codatsAuthored     Codat[]     @relation("CodatAuthor")
-  codatsSaved        Codat[]       @relation("CodatSaved")
+  image              String?      @db.Text
+  attachedAiSearcher AiSearcher?  @relation("AiSearcher")
+  teamsPartsOf       Teams[]      @relation("TeamMembers")
+  teamsOwnerOf       Teams[]      @relation("TeamOwner")
+  teamsModeratorOf   Teams[]      @relation("TeamModerators")
+  codatsAuthored     Codat[]      @relation("CodatAuthor")
+  codatsSaved        Codat[]      @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
-
-  usersFollowed      Profile[]   @relation("UserFollowed")
-  usersFollowing     Profile[]   @relation("UserFollowed")
+  usersFollowed      Profile[]    @relation("UserFollowed")
+  usersFollowing     Profile[]    @relation("UserFollowed")
 
   @@index([id])
 }
 
 model AiSearcher {
-  aiId           String @id @default(uuid())
-  attachedProfile   Profile   @relation("AiSearcher", fields: [attachedProfileId], references: [id],onDelete: Cascade)
-  attachedProfileId String @unique
-  textToPassToAI Json   @default("[]")
+  aiId              String  @id @default(uuid())
+  attachedProfile   Profile @relation("AiSearcher", fields: [attachedProfileId], references: [id], onDelete: Cascade)
+  attachedProfileId String  @unique
+  textToPassToAI    Json    @default("[]")
 
   @@index([aiId])
 }
