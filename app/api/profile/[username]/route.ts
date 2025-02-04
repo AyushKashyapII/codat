@@ -1,7 +1,5 @@
+import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest, { params }: { params: { username: string } }) {
   console.log('Fetching profile for:', params.username);
@@ -13,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: { username: st
   }
 
   try {
-    const profile = await prisma.profile.findUnique({
+    const profile = await db.profile.findUnique({
       where: { name: username },
       include: {
         codatsAuthored: true,
