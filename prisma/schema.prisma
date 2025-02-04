@@ -81,10 +81,23 @@ model Profile {
   codatsAuthored     Codat[]      @relation("CodatAuthor")
   codatsSaved        Codat[]      @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
-  usersFollowed      Profile[]    @relation("UserFollowed")
-  usersFollowing     Profile[]    @relation("UserFollowed")
+
+  usersFollowed      UserFollow[] @relation("UserFollowing")
+  usersFollowing     UserFollow[] @relation("UserFollowed")
 
   @@index([id])
+  @@index([name])
+}
+
+model UserFollow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+
+  follower    Profile  @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   Profile  @relation("UserFollowed", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
 }
 
 model AiSearcher {
