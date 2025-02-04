@@ -1,6 +1,11 @@
 import type { Config } from "tailwindcss";
 
 export default {
+  safelist: [
+    {
+      pattern: /(bg|text|border)-(blue|green|red|purple)-(400|500)/
+    }
+  ],
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
