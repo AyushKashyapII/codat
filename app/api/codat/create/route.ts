@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         }, { status: 400 });
     }
 
-    const { code, language, title, description } = requestBody;
+    const { code, language, title, description, collectionId } = requestBody;
 
     // Validate request body
     if (!code || !language || !title) {
@@ -61,6 +61,12 @@ export async function POST(req: Request) {
     const aiDescritpion = await aiDesc(code, language, currentUser.name || " ") || '';
     const aiFunction = await aiFunc(code, language, currentUser.name || " ") || '';
     
+    const collection = db.collections.findUnique({
+        where:{
+            collectionId:collectionId
+        }
+    })
+
     const codat = await db.codat.create({
         data: {
         codatName: title,
@@ -75,6 +81,11 @@ export async function POST(req: Request) {
         codatAIDesc: aiDescritpion,
         codatAIFunc: aiFunction,
         codatIsPublic: false,
+        codatsCollectionPartOf: {
+            connect: {
+                collectionId: collectionId
+            }
+        }
         },
     });
 
@@ -111,6 +122,6 @@ export async function POST(req: Request) {
     }
     const isStored = await qdrantStore(code, language, currentUser.name, Number(codat.codatId));
     console.log('Codat saved successfully:', codat);
-    return NextResponse.json({ message: 'Codat saved successfully', codat });
+    return NextResponse.json({ message: 'Codat saved successfully', codat }, { status: 200 });
 }
 

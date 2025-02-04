@@ -26,7 +26,7 @@ model Codat {
   codatAIFunc      String
   codatsSavedBy    Profile[]  @relation("CodatSaved")
   codatTeamsPartOf Teams[] @relation("TeamCodats")
-  codatsCollectionPartOf Collections[] @relation("CollectionCodats")
+  codatsCollectionPartOf Collections @relation("CollectionCodats", fields: [codatId], references: [collectionId])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -81,6 +81,9 @@ model Profile {
   codatsAuthored     Codat[]     @relation("CodatAuthor")
   codatsSaved        Codat[]       @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
+
+  usersFollowed      Profile[]   @relation("UserFollowed")
+  usersFollowing     Profile[]   @relation("UserFollowed")
 
   @@index([id])
 }
