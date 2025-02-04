@@ -72,7 +72,6 @@ model Profile {
   email              String       @unique
   phoneNumber        String?      @unique
   name               String?      @default("Codat Profile") @unique
-  password           String?
   image              String?      @db.Text
   attachedAiSearcher AiSearcher?  @relation("AiSearcher")
   teamsPartsOf       Teams[]      @relation("TeamMembers")

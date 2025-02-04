@@ -1,18 +1,17 @@
 "use client";
 
-import {useParams, useRouter} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {Codat} from "@prisma/client";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Loader from "@/components/loader";
 import axios from "axios";
-
+import { useModel } from "@/hooks/user-model-store";
 
 const CodatPage = () => {
   const router = useRouter();
-  const [codat,setCodat] = useState<Codat|null>(null);
+  const {codat,setCodat} = useModel();
   const params = useParams();
-  const codatId = params.codatId;
+  const codatId = params.codatId as string;
 
   useEffect(() => {
     async function fetchCodat() {
@@ -28,11 +27,14 @@ const CodatPage = () => {
         console.error(e);
       }
     }
-  })
+
+    if (codatId) {
+      fetchCodat();
+    }
+  }, [codatId]);
+
   if (!codat) {
-    return (
-      <Loader />
-    );
+    return <Loader />;
   }
 
   return (
@@ -74,7 +76,8 @@ const CodatPage = () => {
         </div>
 
         <p className="text-gray-500 mt-2 text-sm">
-          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated: {new Date(codat.updatedAt).toLocaleDateString()}
+          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated:{" "}
+          {new Date(codat.updatedAt).toLocaleDateString()}
         </p>
       </div>
 

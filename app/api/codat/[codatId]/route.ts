@@ -1,18 +1,8 @@
 import {NextRequest, NextResponse} from "next/server";
-import {currentProfile} from "@/lib/current-profile";
 import {db} from "@/lib/db";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{codatId: string}>}) {
   try {
-    const profile = await currentProfile();
-    console.log(profile);
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'User not logged in' },
-        { status: 403 }
-      )
-    }
 
     const { codatId } = await params;
 
