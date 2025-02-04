@@ -1,11 +1,13 @@
+import { currentProfile } from '@/lib/current-profile';
 import { initialProfile } from '@/lib/initial-profile';
 import { UserButton } from '@clerk/nextjs';
 import React from 'react';
 
 const Page = async () => {
-  const profile = await initialProfile();
+  await initialProfile();
+  const profile = await currentProfile();
   return (
-    <h1>Hello Mrinal</h1>
+    <h1>{profile?.name}</h1>
   );
 };
 

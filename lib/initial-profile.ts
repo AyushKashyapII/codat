@@ -32,5 +32,11 @@ export const initialProfile = async () => {
     }
   });
 
+  const attachingAISearcher = await db.aiSearcher.create({
+    data: {
+      attachedProfileId: newProfile.id
+    }
+  });
+
   return newProfile;
 };
