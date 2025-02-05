@@ -32,7 +32,7 @@ export const initialProfile = async () => {
     }
   });
 
-  const attachingAISearcher = await db.aiSearcher.create({
+  await db.aiSearcher.create({
     data: {
       attachedProfileId: newProfile.id
     }

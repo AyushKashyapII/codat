@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Loader from "@/components/loader";
 import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
