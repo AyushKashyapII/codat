@@ -58,14 +58,14 @@ export async function POST(req: Request) {
     if (!currentUser.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const aiDescritpion = await aiDesc(code, language, currentUser.name || " ") || '';
-    const aiFunction = await aiFunc(code, language, currentUser.name || " ") || '';
+    const aiDescritpion = await aiDesc(code, language ) || '';
+    const aiFunction = await aiFunc(code, language) || '';
     
-    const collection = db.collections.findUnique({
-        where:{
-            collectionId:collectionId
-        }
-    })
+    // const collection = db.collections.findUnique({
+    //     where:{
+    //         collectionId:collectionId
+    //     }
+    // })
 
     const codat = await db.codat.create({
         data: {
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     ? JSON.parse(JSON.stringify(aiSearcherData.textToPassToAI)) 
     : [];
 
-    const aiSearcher = await db.aiSearcher.update({
+    await db.aiSearcher.update({
         where: {
             attachedProfileId: currentUser.id
         },
@@ -120,7 +120,7 @@ export async function POST(req: Request) {
     if (!currentUser.name) {
         return NextResponse.json({ error: 'User name not found' }, { status: 400 });
     }
-    const isStored = await qdrantStore(code, language, currentUser.name, Number(codat.codatId));
+    await qdrantStore(code, language, currentUser.name, Number(codat.codatId));
     console.log('Codat saved successfully:', codat);
     return NextResponse.json({ message: 'Codat saved successfully', codat }, { status: 200 });
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import axios from 'axios'
   import { useModel } from '@/hooks/user-model-store'
+import Image from 'next/image'
 
 export default function ProfilePage() {
   const { profile, setProfile } = useModel();
@@ -40,7 +41,7 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <div className="flex items-center gap-4">
         {profile.image && (
-          <img src={profile.image} alt={profile.name} className="w-20 h-20 rounded-full" />
+          <Image src={profile.image} alt={profile.name as string} className="w-20 h-20 rounded-full" />
         )}
         <div>
           <h1 className="text-2xl font-bold">{profile.name}</h1>
