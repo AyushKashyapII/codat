@@ -74,7 +74,6 @@ const CodatPage = () => {
         router.push("/");
       }
     }
-
     if (codatId) {
       fetchCodat();
     }
@@ -129,7 +128,7 @@ const CodatPage = () => {
         </div>
 
         <p className="text-gray-500 mt-2 text-sm">
-          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated:{" "}
+          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated: {" "}
           {new Date(codat.updatedAt).toLocaleDateString()}
         </p>
       </motion.div>
