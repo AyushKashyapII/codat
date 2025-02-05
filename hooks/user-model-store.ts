@@ -1,5 +1,23 @@
-import { Codat, Collections } from "@prisma/client";
 import { create } from "zustand";
+
+interface Codat {
+  codatId: string;
+  codatName: string;
+  codatDescription: string;
+  codatLanguage: string;
+  codatCode: string;
+  codatIsPublic: boolean;
+  codatAIDesc: string;
+  codatAIFunc: string;
+  createdAt: Date;
+  updatedAt: Date;
+  codatAuthor: {
+    id: string;
+    name: string;
+    email: string;
+    image: string;
+  };
+}
 
 interface AiSearcher {
   aiId: string;
@@ -9,6 +27,19 @@ interface AiSearcher {
 interface Teams {
   teamId: string;
   teamName: string;
+}
+
+interface Collection {
+  collectionName: string;
+  collectionDesc: string;
+  collectionCodats: {
+    codatName: string;
+    codatDescription: string;
+    codatLanguage: string;
+    codatId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }[];
 }
 
 interface AllCollections {
@@ -35,7 +66,6 @@ interface Profile {
   codatsAuthored: Codat[];
   codatsSaved: Codat[];
   codatsCollections: AllCollections[];
-  singleCodatCollection: Collections | null;
   usersFollowed: UserFollow[];
   usersFollowing: UserFollow[];
 }
@@ -44,11 +74,11 @@ interface ModelStore {
   profile: Profile | null;
   codat: Codat | null;
   codatsCollections: AllCollections | null;
-  singleCodatCollection: Collections | null;
+  singleCodatCollection: Collection | null;
   setProfile: (profile: Profile) => void;
   setCodat: (codat: Codat) => void;
   setAllCodatsCollections: (codatsCollections: AllCollections | null) => void;
-  setSingleCodatCollections: (codatCollection: Collections | null) => void;
+  setSingleCodatCollection: (codatCollection: Collection | null) => void;
 }
 
 export const useModel = create<ModelStore>((set) => ({
@@ -60,5 +90,5 @@ export const useModel = create<ModelStore>((set) => ({
   setProfile: (profile) => set({ profile }),
   setCodat: (codat) => set({ codat }),
   setAllCodatsCollections: (codatsCollections) => set({ codatsCollections }),
-  setSingleCodatCollections: (singleCodatCollection) =>set({ singleCodatCollection }),
+  setSingleCodatCollection: (singleCodatCollection) => set({ singleCodatCollection }),
 }));
