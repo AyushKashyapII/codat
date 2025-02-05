@@ -50,7 +50,7 @@ const CollectionsPage = () => {
     }
     try {
       setLoading(true);
-      const res = await axios.post("/api/collections", {
+      const res = await axios.post("/api/collections/user", {
         collectionName,
         collectionDesc,
       });
