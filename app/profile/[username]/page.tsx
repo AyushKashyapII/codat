@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import axios from 'axios'
-import { Profile } from '@prisma/client'
-import { useModel } from '@/hooks/user-model-store'
+  import { useModel } from '@/hooks/user-model-store'
 
 export default function ProfilePage() {
   const { profile, setProfile } = useModel();

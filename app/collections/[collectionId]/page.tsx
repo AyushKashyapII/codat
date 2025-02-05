@@ -5,22 +5,12 @@ import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import Loader from "@/components/loader";
 import { motion } from "framer-motion";
+import { useModel } from "@/hooks/user-model-store";
 
-interface Codats {
-  collectionName: string,
-  collectionDesc: string,
-  collectionCodats: {
-    codatName: string,
-    codatDescription: string,
-    codatLanguage: string,
-    codatId: string,
-    createdAt: Date,
-    updatedAt: Date
-  }[]
-}
+
 
 const CollectionCodatsPage = () => {
-  const [codats, setCodats] = useState<Codats|null>(null);
+  const {singleCodatCollection,setSingleCodatCollection} = useModel();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
@@ -35,7 +25,7 @@ const CollectionCodatsPage = () => {
       try {
         const res = await axios.get(`/api/collections/${collectionId}`);
         if (res.status === 200) {
-          setCodats(res.data);
+          setSingleCodatCollection(res.data);
         }
       } catch (error) {
         console.error("Error fetching codats", error);
@@ -47,7 +37,9 @@ const CollectionCodatsPage = () => {
     fetchCodats()
   }, [collectionId]);
 
-  if (loading || !codats) {
+  const collection = singleCodatCollection;
+
+  if (loading || !collection) {
     return <Loader />;
   }
 
@@ -66,7 +58,7 @@ const CollectionCodatsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        {codats.collectionName}
+        {collection.collectionName}
       </motion.h1>
 
       <motion.p
@@ -75,7 +67,7 @@ const CollectionCodatsPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.2 }}
       >
-        {codats.collectionDesc}
+        {collection.collectionDesc}
       </motion.p>
 
       <motion.button
@@ -88,7 +80,7 @@ const CollectionCodatsPage = () => {
       </motion.button>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
-        {codats.collectionCodats.map((codat, index) => (
+        {collection.collectionCodats.map((codat, index) => (
           <motion.div
             key={codat.codatId}
             className="bg-gray-900 p-6 rounded-xl shadow-md hover:shadow-xl transition-transform transform hover:scale-105 border border-gray-700"
