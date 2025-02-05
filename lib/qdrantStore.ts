@@ -6,10 +6,13 @@ import { QdrantClient } from '@qdrant/js-client-rest';
 if (!process.env.GOOGLE_API_KEY || !process.env.QDRANT_URL || !process.env.QDRANT_API_KEY) {
     throw new Error('Required environment variables are not defined');
   }
-  
-  const groqClient = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-  });
+
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const groqClient = process.env.GROQ_API_KEY
+  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
+  : null;
+
   
   const qdrantClient = new QdrantClient({
     url: process.env.QDRANT_URL,
@@ -43,7 +46,9 @@ while (currentTry < maxRetries) {
         throw new Error(`Vector size mismatch. Expected: ${vectorSize}, Got: ${collection.config.params.vectors?.size}`);
         }
         return;
-    } catch (error: any) {
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
         if (error.status !== 404) {
         throw error;
         }
@@ -73,7 +78,9 @@ while (currentTry < maxRetries) {
     }
     
     return;
-    } catch (error: any) {
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
     currentTry++;
     console.error(`Attempt ${currentTry}/${maxRetries} failed:`, error);
     
@@ -89,7 +96,9 @@ while (currentTry < maxRetries) {
 const validateQdrantConnection = async (): Promise<void> => {
 try {
     await qdrantClient.getCollections();
-} catch (error: any) {
+} 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+catch (error: any) {
     throw new Error(`Failed to connect to Qdrant: ${error.message || 'Unknown error'}`);
 }
 };

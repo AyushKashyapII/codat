@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { aiDesc } from '@/lib/codatAIDescription';
 import { aiFunc } from '@/lib/codatAIFunction';
-import { qdrantStore } from '@/lib/qdrantStore';
 import { currentProfile } from '@/lib/current-profile';
 
-export async function PATCH(req: Request, { params }: { params: { codatId: string[] } }) {
+export async function PATCH(req: Request, { params }:  { params: Promise<{codatId: string}>}) {
 
     const currentUser = await currentProfile();
 
@@ -27,7 +26,7 @@ export async function PATCH(req: Request, { params }: { params: { codatId: strin
     }
 
     const { code, language, description, title } = requestBody;
-    const codatId = params.codatId[0];
+    const {codatId} = await params;
     
     if (!currentUser.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -44,8 +43,8 @@ export async function PATCH(req: Request, { params }: { params: { codatId: strin
     }
 
     if (code){
-        const aiDescritpion = await aiDesc(code, language, currentUser.name || " ") || '';
-        const aiFunction = await aiFunc(code, language, currentUser.name || '') || '';
+        const aiDescritpion = await aiDesc(code, language) || '';
+        const aiFunction = await aiFunc(code, language) || '';
     
         const codat = await db.codat.update({
             where: { codatId: codatId },
