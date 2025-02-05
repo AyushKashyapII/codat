@@ -124,4 +124,3 @@ export async function POST(req: Request) {
     console.log('Codat saved successfully:', codat);
     return NextResponse.json({ message: 'Codat saved successfully', codat }, { status: 200 });
 }
-
