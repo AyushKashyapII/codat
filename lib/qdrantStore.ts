@@ -6,6 +6,8 @@ import { QdrantClient } from '@qdrant/js-client-rest';
 if (!process.env.GOOGLE_API_KEY || !process.env.QDRANT_URL || !process.env.QDRANT_API_KEY) {
     throw new Error('Required environment variables are not defined');
   }
+
+  
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const groqClient = new Groq({
     apiKey: process.env.GROQ_API_KEY,
