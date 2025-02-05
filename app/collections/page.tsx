@@ -1,6 +1,8 @@
+import { initialProfile } from '@/lib/initial-profile'
 import React from 'react'
 
-function page() {
+async function page() {
+  await initialProfile();
   return (
     <div>page</div>
   )

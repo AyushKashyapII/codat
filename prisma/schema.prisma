@@ -80,6 +80,7 @@ model Profile {
   codatsAuthored     Codat[]      @relation("CodatAuthor")
   codatsSaved        Codat[]      @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
+  password           String?
 
   usersFollowed      UserFollow[] @relation("UserFollowing")
   usersFollowing     UserFollow[] @relation("UserFollowed")

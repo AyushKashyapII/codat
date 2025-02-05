@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Code, Search, Globe, Users, ChevronDown } from 'lucide-react';
 import Head from 'next/head';
+import { UserButton } from '@clerk/nextjs';
 
 export default function HomePage() {
   const [typedText, setTypedText] = useState('');

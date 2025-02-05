@@ -2,14 +2,61 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Loader from "@/components/loader";
 import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
+import { getHighlighter } from 'shiki';
 
+const CodeBlock = ({ code, language }: { code: string; language: string }) => {
+  const [highlightedCode, setHighlightedCode] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const highlightCode = async () => {
+      try {
+        const highlighter = await getHighlighter({
+          themes: ['monokai'],  // Changed to monokai for brighter colors
+          langs: ['ts']
+        });
+
+        const highlighted = highlighter.codeToHtml(code, {
+          lang: 'ts',
+          theme: 'monokai'
+        });
+
+        setHighlightedCode(highlighted);
+      } catch (error) {
+        console.error('Failed to highlight code:', error);
+        setHighlightedCode(code);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    highlightCode();
+  }, [code, language]);
+
+  if (isLoading) {
+    return <div className="bg-gray-800 p-4 rounded-md h-24 animate-pulse" />;
+  }
+
+  return (
+    <div 
+      className="bg-gray-800 p-4 rounded-md overflow-auto text-sm"
+    >
+      <div 
+        className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0"
+        dangerouslySetInnerHTML={{ __html: highlightedCode }} 
+      />
+    </div>
+  );
+};
+
+// Rest of the component remains the same
 const CodatPage = () => {
   const router = useRouter();
-  const {codat,setCodat} = useModel();
+  const {codat, setCodat} = useModel();
   const params = useParams();
   const codatId = params.codatId as string;
 
@@ -17,7 +64,6 @@ const CodatPage = () => {
     async function fetchCodat() {
       try {
         const res = await axios.get(`/api/codat/${codatId}`);
-
         if (res.status === 200) {
           setCodat(res.data);
         } else {
@@ -25,13 +71,14 @@ const CodatPage = () => {
         }
       } catch (e) {
         console.error(e);
+        router.push("/");
       }
     }
 
     if (codatId) {
       fetchCodat();
     }
-  }, [codatId]);
+  }, [codatId, router, setCodat]);
 
   if (!codat) {
     return <Loader />;
@@ -64,11 +111,17 @@ const CodatPage = () => {
         {codat.codatDescription}
       </motion.p>
 
-      <div className="bg-gray-900 p-4 rounded-xl shadow-lg w-full max-w-3xl border border-gray-700 mb-6">
+      <motion.div 
+        className="bg-gray-900 p-4 rounded-xl shadow-lg w-full max-w-3xl border border-gray-700 mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1, delay: 0.3 }}
+      >
         <h2 className="text-xl font-semibold mb-2">Code:</h2>
-        <pre className="bg-gray-800 p-4 rounded-md overflow-auto text-sm">
-          <code>{codat.codatCode}</code>
-        </pre>
+        <CodeBlock 
+          code={codat.codatCode}
+          language={codat.codatLanguage}
+        />
 
         <div className="flex justify-between text-gray-400 mt-4">
           <p>Language: {codat.codatLanguage}</p>
@@ -79,7 +132,7 @@ const CodatPage = () => {
           Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated:{" "}
           {new Date(codat.updatedAt).toLocaleDateString()}
         </p>
-      </div>
+      </motion.div>
 
       <motion.div
         className="bg-gray-800 p-4 rounded-md shadow-md w-full max-w-3xl border border-gray-600 mb-4"
@@ -89,9 +142,10 @@ const CodatPage = () => {
       >
         <h3 className="text-lg font-semibold mb-2">AI Insights</h3>
         <p className="text-gray-300 mb-2">Description: {codat.codatAIDesc}</p>
-        <pre className="bg-gray-700 p-3 rounded-md text-sm overflow-auto">
-          <code>{codat.codatAIFunc}</code>
-        </pre>
+        <CodeBlock 
+          code={codat.codatAIFunc}
+          language={codat.codatLanguage}
+        />
       </motion.div>
 
       <motion.button
