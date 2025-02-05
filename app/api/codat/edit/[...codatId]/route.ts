@@ -4,7 +4,7 @@ import { aiDesc } from '@/lib/codatAIDescription';
 import { aiFunc } from '@/lib/codatAIFunction';
 import { currentProfile } from '@/lib/current-profile';
 
-export async function PATCH(req: Request, { params }: { params: { codatId: string[] } }) {
+export async function PATCH(req: Request, { params }:  { params: Promise<{codatId: string}>}) {
 
     const currentUser = await currentProfile();
 
@@ -26,7 +26,7 @@ export async function PATCH(req: Request, { params }: { params: { codatId: strin
     }
 
     const { code, language, description, title } = requestBody;
-    const codatId = params.codatId[0];
+    const {codatId} = await params;
     
     if (!currentUser.id) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
