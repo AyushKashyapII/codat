@@ -7,11 +7,12 @@ if (!process.env.GOOGLE_API_KEY || !process.env.QDRANT_URL || !process.env.QDRAN
     throw new Error('Required environment variables are not defined');
   }
 
-  
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const groqClient = new Groq({
-    apiKey: process.env.GROQ_API_KEY,
-  });
+  const groqClient = process.env.GROQ_API_KEY
+  ? new Groq({ apiKey: process.env.GROQ_API_KEY })
+  : null;
+
   
   const qdrantClient = new QdrantClient({
     url: process.env.QDRANT_URL,
