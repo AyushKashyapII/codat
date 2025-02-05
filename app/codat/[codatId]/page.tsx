@@ -9,7 +9,7 @@ import { useModel } from "@/hooks/user-model-store";
 
 const CodatPage = () => {
   const router = useRouter();
-  const {codat,setCodat} = useModel();
+  const { codat, setCodat } = useModel();
   const params = useParams();
   const codatId = params.codatId as string;
 
@@ -17,7 +17,6 @@ const CodatPage = () => {
     async function fetchCodat() {
       try {
         const res = await axios.get(`/api/codat/${codatId}`);
-
         if (res.status === 200) {
           setCodat(res.data);
         } else {
@@ -27,11 +26,10 @@ const CodatPage = () => {
         console.error(e);
       }
     }
-
     if (codatId) {
       fetchCodat();
     }
-  }, [codatId]);
+  }, [codatId, setCodat, router]);
 
   if (!codat) {
     return <Loader />;
@@ -76,7 +74,7 @@ const CodatPage = () => {
         </div>
 
         <p className="text-gray-500 mt-2 text-sm">
-          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated:{" "}
+          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated: {" "}
           {new Date(codat.updatedAt).toLocaleDateString()}
         </p>
       </div>
