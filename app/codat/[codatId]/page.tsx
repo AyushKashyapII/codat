@@ -1,86 +1,94 @@
-"use client";
+"use client"
 
-import { useParams, useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import Loader from "@/components/loader";
-import axios from "axios";
-import { useModel } from "@/hooks/user-model-store";
-import { getHighlighter } from 'shiki';
+import { useParams, useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { useEffect, useState } from "react"
+import Loader from "@/components/loader"
+import axios from "axios"
+import { useModel } from "@/hooks/user-model-store"
+import { createHighlighter } from "shiki"
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
-  const [highlightedCode, setHighlightedCode] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [highlightedCode, setHighlightedCode] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const highlightCode = async () => {
       try {
-        const highlighter = await getHighlighter({
-          themes: ['monokai'],  // Changed to monokai for brighter colors
-          langs: ['ts']
-        });
+        const highlighter = await createHighlighter({
+          themes: ["catppuccin-mocha"],
+          langs: ["ts"],
+        })
 
         const highlighted = highlighter.codeToHtml(code, {
-          lang: 'ts',
-          theme: 'monokai'
-        });
+          lang: "ts",
+          theme: "catppuccin-mocha",
+        })
 
-        setHighlightedCode(highlighted);
+        setHighlightedCode(highlighted)
       } catch (error) {
-        console.error('Failed to highlight code:', error);
-        setHighlightedCode(code);
+        console.error("Failed to highlight code:", error)
+        setHighlightedCode(code)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    highlightCode();
-  }, [code, language]);
+    highlightCode()
+  }, [code])
 
   if (isLoading) {
-    return <div className="bg-gray-800 p-4 rounded-md h-24 animate-pulse" />;
+    return <div className="bg-gray-800 p-4 rounded-md h-24 animate-pulse" />
   }
 
   return (
-    <div 
-      className="bg-gray-800 p-4 rounded-md overflow-auto text-sm"
-    >
-      <div 
-        className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0"
-        dangerouslySetInnerHTML={{ __html: highlightedCode }} 
+    <div className="p-4 rounded-md overflow-auto text-sm bg-[#1e1e2e]">
+      <div
+        className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0 [&_.shiki]:!bg-transparent"
+        dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </div>
-  );
-};
+  )
+}
 
-// Rest of the component remains the same
 const CodatPage = () => {
-  const router = useRouter();
-  const {codat, setCodat} = useModel();
-  const params = useParams();
-  const codatId = params.codatId as string;
+  const router = useRouter()
+  const { codat, setCodat } = useModel()
+  const params = useParams()
+  const codatId = params.codatId as string
+  const [isClient, setIsClient] = useState(false)
+
+  // Use this effect to mark when component is mounted on client
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   useEffect(() => {
     async function fetchCodat() {
       try {
-        const res = await axios.get(`/api/codat/${codatId}`);
+        const res = await axios.get(`/api/codat/${codatId}`)
         if (res.status === 200) {
-          setCodat(res.data);
+          setCodat(res.data)
         } else {
-          router.push("/");
+          router.push("/")
         }
       } catch (e) {
-        console.error(e);
-        router.push("/");
+        console.error(e)
+        router.push("/")
       }
     }
     if (codatId) {
-      fetchCodat();
+      fetchCodat()
     }
-  }, [codatId, router, setCodat]);
+  }, [codatId, router, setCodat])
+
+  // Only render content after client-side hydration is complete
+  if (!isClient) {
+    return <Loader />
+  }
 
   if (!codat) {
-    return <Loader />;
+    return <Loader />
   }
 
   return (
@@ -110,17 +118,14 @@ const CodatPage = () => {
         {codat.codatDescription}
       </motion.p>
 
-      <motion.div 
+      <motion.div
         className="bg-gray-900 p-4 rounded-xl shadow-lg w-full max-w-3xl border border-gray-700 mb-6"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.3 }}
       >
         <h2 className="text-xl font-semibold mb-2">Code:</h2>
-        <CodeBlock 
-          code={codat.codatCode}
-          language={codat.codatLanguage}
-        />
+        <CodeBlock code={codat.codatCode} language={codat.codatLanguage} />
 
         <div className="flex justify-between text-gray-400 mt-4">
           <p>Language: {codat.codatLanguage}</p>
@@ -128,7 +133,7 @@ const CodatPage = () => {
         </div>
 
         <p className="text-gray-500 mt-2 text-sm">
-          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated: {" "}
+          Created: {new Date(codat.createdAt).toLocaleDateString()} | Updated:{" "}
           {new Date(codat.updatedAt).toLocaleDateString()}
         </p>
       </motion.div>
@@ -141,10 +146,7 @@ const CodatPage = () => {
       >
         <h3 className="text-lg font-semibold mb-2">AI Insights</h3>
         <p className="text-gray-300 mb-2">Description: {codat.codatAIDesc}</p>
-        <CodeBlock 
-          code={codat.codatAIFunc}
-          language={codat.codatLanguage}
-        />
+        <CodeBlock code={codat.codatAIFunc} language={codat.codatLanguage} />
       </motion.div>
 
       <motion.button
@@ -156,7 +158,7 @@ const CodatPage = () => {
         Go Back
       </motion.button>
     </div>
-  );
-};
+  )
+}
 
-export default CodatPage;
+export default CodatPage
