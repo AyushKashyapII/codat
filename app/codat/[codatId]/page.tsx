@@ -17,25 +17,25 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
       try {
         const highlighter = await createHighlighter({
           themes: ["catppuccin-mocha"],
-          langs: ["ts"],
+          langs: [language.toLowerCase()],
         })
 
         const highlighted = highlighter.codeToHtml(code, {
-          lang: "ts",
+          lang: language.toLowerCase(),
           theme: "catppuccin-mocha",
         })
 
         setHighlightedCode(highlighted)
       } catch (error) {
         console.error("Failed to highlight code:", error)
-        setHighlightedCode(code)
+        setHighlightedCode(`<pre><code>${code}</code></pre>`)
       } finally {
         setIsLoading(false)
       }
     }
 
     highlightCode()
-  }, [code])
+  }, [code, language])
 
   if (isLoading) {
     return <div className="bg-gray-800 p-4 rounded-md h-24 animate-pulse" />
@@ -53,12 +53,11 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
 
 const CodatPage = () => {
   const router = useRouter()
-  const { codat, setCodat } = useModel()
+  const { profile, codat, setCodat } = useModel()
   const params = useParams()
   const codatId = params.codatId as string
   const [isClient, setIsClient] = useState(false)
 
-  // Use this effect to mark when component is mounted on client
   useEffect(() => {
     setIsClient(true)
   }, [])
@@ -66,9 +65,9 @@ const CodatPage = () => {
   useEffect(() => {
     async function fetchCodat() {
       try {
-        const res = await axios.get(`/api/codat/${codatId}`)
+        const res = await axios.get(`/api/codat/${codatId}`)        
         if (res.status === 200) {
-          setCodat(res.data)
+          setCodat(res.data)          
         } else {
           router.push("/")
         }
@@ -77,18 +76,34 @@ const CodatPage = () => {
         router.push("/")
       }
     }
-    if (codatId) {
+
+    if (!codat && codatId) {
       fetchCodat()
     }
-  }, [codatId, router, setCodat])
+  }, [codat, codatId, router, setCodat])
 
-  // Only render content after client-side hydration is complete
-  if (!isClient) {
-    return <Loader />
-  }
+  if (!isClient) return <Loader />
+  if (!codat) return <Loader />
 
-  if (!codat) {
-    return <Loader />
+  if (!codat?.codatIsPublic && profile?.id !== codat?.codatAuthor?.id) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
+          <p className="text-gray-400 text-lg">
+            This Codat is private and cannot be viewed.
+          </p>
+          <motion.button
+            className="mt-6 px-6 py-3 bg-white text-black font-bold rounded-xl shadow-lg hover:bg-gray-300 transition-transform transform hover:scale-105"
+            onClick={() => router.back()}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Go Back
+          </motion.button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -149,8 +164,19 @@ const CodatPage = () => {
         <CodeBlock code={codat.codatAIFunc} language={codat.codatLanguage} />
       </motion.div>
 
+      {profile?.id === codat?.codatAuthor?.id && (
+        <motion.button
+          className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-500 transition-transform transform hover:scale-105"
+          onClick={() => router.push(`/edit-club/${codat.codatId}`)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          Edit Club
+        </motion.button>
+      )}
+
       <motion.button
-        className="px-6 py-3 bg-white text-black font-bold rounded-xl shadow-lg hover:bg-gray-300 transition-transform transform hover:scale-105"
+        className="px-6 py-3 bg-white text-black font-bold rounded-xl shadow-lg hover:bg-gray-300 transition-transform transform hover:scale-105 mt-4"
         onClick={() => router.back()}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
