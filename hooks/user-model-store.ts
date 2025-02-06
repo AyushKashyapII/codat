@@ -59,7 +59,6 @@ interface Profile {
   phoneNumber?: string;
   name?: string;
   image?: string;
-  attachedAiSearcher?: AiSearcher;
   teamsPartsOf: Teams[];
   teamsOwnerOf: Teams[];
   teamsModeratorOf: Teams[];
@@ -75,10 +74,12 @@ interface ModelStore {
   codat: Codat | null;
   codatsCollections: AllCollections | null;
   singleCodatCollection: Collection | null;
+
   setProfile: (profile: Profile) => void;
   setCodat: (codat: Codat) => void;
   setAllCodatsCollections: (codatsCollections: AllCollections | null) => void;
   setSingleCodatCollection: (codatCollection: Collection | null) => void;
+  setEditProfile:(club:Profile) => void;
 }
 
 export const useModel = create<ModelStore>((set) => ({
@@ -91,4 +92,5 @@ export const useModel = create<ModelStore>((set) => ({
   setCodat: (codat) => set({ codat }),
   setAllCodatsCollections: (codatsCollections) => set({ codatsCollections }),
   setSingleCodatCollection: (singleCodatCollection) => set({ singleCodatCollection }),
+  setEditProfile:(profile) => set({profile})
 }));
