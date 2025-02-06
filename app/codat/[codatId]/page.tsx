@@ -7,6 +7,7 @@ import Loader from "@/components/loader"
 import axios from "axios"
 import { useModel } from "@/hooks/user-model-store"
 import { createHighlighter } from "shiki"
+import {  useUser } from "@clerk/nextjs"
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const [highlightedCode, setHighlightedCode] = useState("")
@@ -53,10 +54,16 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
 
 const CodatPage = () => {
   const router = useRouter()
-  const { profile, codat, setCodat } = useModel()
+  const { codat, setCodat } = useModel()
   const params = useParams()
-  const codatId = params.codatId as string
+  const codatId = params.codatId as string  
   const [isClient, setIsClient] = useState(false)
+  const {isSignedIn,user} = useUser();
+
+  console.log(user?.emailAddresses[0].emailAddress);
+
+  const userEmail = user?.emailAddresses[0].emailAddress
+  
 
   useEffect(() => {
     setIsClient(true)
@@ -85,7 +92,7 @@ const CodatPage = () => {
   if (!isClient) return <Loader />
   if (!codat) return <Loader />
 
-  if (!codat?.codatIsPublic && profile?.id !== codat?.codatAuthor?.id) {
+  if (isSignedIn && !codat?.codatIsPublic && userEmail !== codat?.codatAuthor?.email) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
         <div className="text-center">
@@ -164,7 +171,7 @@ const CodatPage = () => {
         <CodeBlock code={codat.codatAIFunc} language={codat.codatLanguage} />
       </motion.div>
 
-      {profile?.id === codat?.codatAuthor?.id && (
+      {userEmail === codat?.codatAuthor?.id && (
         <motion.button
           className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-500 transition-transform transform hover:scale-105"
           onClick={() => router.push(`/edit-club/${codat.codatId}`)}
