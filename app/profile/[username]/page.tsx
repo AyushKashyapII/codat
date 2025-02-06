@@ -41,7 +41,7 @@ export default function ProfilePage() {
       {/* Profile Header */}
       <div className="flex items-center gap-4">
         {profile.image && (
-          <Image src={profile.image} alt={profile.name as string} className="w-20 h-20 rounded-full" />
+          <img src={profile.image} alt={profile.name as string} className="w-20 h-20 rounded-full" />
         )}
         <div>
           <h1 className="text-2xl font-bold">{profile.name}</h1>
