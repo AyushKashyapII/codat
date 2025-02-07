@@ -92,6 +92,13 @@ const CodatPage = () => {
   if (!isClient) return <Loader />
   if (!codat) return <Loader />
 
+  console.log(`user email ${userEmail}`);
+  console.log(codat.codatAuthor);
+  
+  console.log(`author email${codat?.codatAuthor?.email}`);
+  
+  
+
   if (isSignedIn && !codat?.codatIsPublic && userEmail !== codat?.codatAuthor?.email) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
@@ -171,14 +178,14 @@ const CodatPage = () => {
         <CodeBlock code={codat.codatAIFunc} language={codat.codatLanguage} />
       </motion.div>
 
-      {userEmail === codat?.codatAuthor?.id && (
+      {userEmail === codat?.codatAuthor?.email && (
         <motion.button
           className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg hover:bg-blue-500 transition-transform transform hover:scale-105"
-          onClick={() => router.push(`/edit-club/${codat.codatId}`)}
+          onClick={() => router.push(`/edit/${codat.codatId}`)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          Edit Club
+          Edit Codat
         </motion.button>
       )}
 
