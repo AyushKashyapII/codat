@@ -20,6 +20,7 @@ export async function GET(req: NextRequest, { params }:  { params: Promise<{coda
             id: true,
             name: true,
             image: true,
+            email:true
           },
         },
       },

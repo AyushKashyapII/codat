@@ -72,7 +72,7 @@ const CollectionCodatsPage = () => {
 
       <motion.button
         className="px-6 py-3 bg-white text-black font-bold rounded-xl shadow-lg hover:bg-gray-300 transition-transform transform hover:scale-105 mb-6"
-        onClick={() => router.push(`/codats/add/${collectionId}`)}
+        onClick={() => router.push(`/codat/add/${collectionId}`)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -105,7 +105,7 @@ const CollectionCodatsPage = () => {
 
             <motion.button
               className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition"
-              onClick={() => router.push(`/codats/${codat.codatId}`)}
+              onClick={() => router.push(`/codat/${codat.codatId}`)}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
