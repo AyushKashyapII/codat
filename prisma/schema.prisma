@@ -32,6 +32,7 @@ model Codat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([codatId])
   @@index([authorId, codatIsPublic])
   @@index([collectionId, createdAt])
 }
@@ -88,6 +89,7 @@ model Profile {
 
   @@index([id])
   @@index([name])
+  @@index([token])
 }
 
 model UserFollow {

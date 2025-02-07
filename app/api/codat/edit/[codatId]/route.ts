@@ -46,7 +46,6 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
 
         const { code, language, description, title } = requestBody;
 
-        // Prepare update data
         const updateData: any = {};
 
         if (language) updateData.codatLanguage = language;
@@ -69,7 +68,6 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
             const currentData = aiSearcherData?.textToPassToAI
                 ? JSON.parse(JSON.stringify(aiSearcherData.textToPassToAI))
                 : [];
-
             await db.aiSearcher.update({
                 where: { attachedProfileId: user.id },
                 data: {
@@ -81,7 +79,6 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
             });
         }
 
-        // Perform a single update
         const updatedCodat = await db.codat.update({
             where: { codatId },
             data: updateData
