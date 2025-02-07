@@ -81,6 +81,7 @@ model Profile {
   codatsSaved        Codat[]      @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
   password           String?
+  token              String?      @unique @default(uuid())
 
   usersFollowed      UserFollow[] @relation("UserFollowing")
   usersFollowing     UserFollow[] @relation("UserFollowed")
