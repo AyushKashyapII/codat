@@ -97,9 +97,7 @@ const CodatPage = () => {
   
   console.log(`author email${codat?.codatAuthor?.email}`);
   
-  
-
-  if (isSignedIn && !codat?.codatIsPublic && userEmail !== codat?.codatAuthor?.email) {
+  if (!isSignedIn && !codat?.codatIsPublic && userEmail !== codat?.codatAuthor?.email) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
         <div className="text-center">
