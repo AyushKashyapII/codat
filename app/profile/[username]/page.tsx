@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import axios from 'axios'
-  import { useModel } from '@/hooks/user-model-store'
-import Image from 'next/image'
+import { useModel } from '@/hooks/user-model-store'
 
 export default function ProfilePage() {
   const { profile, setProfile } = useModel();
