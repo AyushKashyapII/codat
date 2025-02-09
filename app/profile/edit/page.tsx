@@ -15,6 +15,7 @@ const page = async() => {
           name={profile?.name as string} 
           phoneNumber={profile?.phoneNumber as string}
           image={profile?.image as string}
+          email={profile.email as string}
   />)
 }
 

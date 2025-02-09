@@ -6,12 +6,18 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 interface EditProfileProps {
-  name: string ; 
+  name: string;
   phoneNumber: string;
   image: string;
+  email: string;
 }
 
-export default function EditProfile({ name: initialName, phoneNumber: initialPhoneNumber, image: initialImage }: EditProfileProps) {
+export default function EditProfile({
+  name: initialName,
+  phoneNumber: initialPhoneNumber,
+  image: initialImage,
+  email,
+}: EditProfileProps) {
   const { setEditProfile } = useModel();
   const [name, setName] = useState(initialName || "");
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || "");
@@ -37,6 +43,18 @@ export default function EditProfile({ name: initialName, phoneNumber: initialPho
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
 
+      {/* Email (Read-only) */}
+      <div className="mb-4">
+        <label className="block font-medium">Email:</label>
+        <input
+          type="text"
+          className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
+          value={email}
+          readOnly
+        />
+      </div>
+
+      {/* Editable Fields */}
       <div className="mb-4">
         <label className="block font-medium">Name:</label>
         <input
@@ -58,15 +76,13 @@ export default function EditProfile({ name: initialName, phoneNumber: initialPho
       </div>
 
       <div className="mb-4">
-        <label className="block font-medium">Profile Image URL:</label>
-        <input
-          type="text"
-          className="w-full p-2 border rounded"
-          value={image}
-          onChange={(e) => setImage(e.target.value)}
-        />
+        <label className="block font-medium">Profile Image:</label>
+        <img src={image}/>
       </div>
 
+      
+
+      {/* Save Button */}
       <button
         onClick={handleUpdateProfile}
         className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
