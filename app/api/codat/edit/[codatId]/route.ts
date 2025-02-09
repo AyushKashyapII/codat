@@ -64,10 +64,13 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
                 where: { attachedProfileId: user.id },
                 select: { textToPassToAI: true }
             });
+            console.log("after aiSearcherData");
+            
 
             const currentData = aiSearcherData?.textToPassToAI
                 ? JSON.parse(JSON.stringify(aiSearcherData.textToPassToAI))
                 : [];
+                console.log("after currentData");
             await db.aiSearcher.update({
                 where: { attachedProfileId: user.id },
                 data: {
@@ -78,6 +81,7 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
                 }
             });
         }
+        console.log("after update");
 
         const updatedCodat = await db.codat.update({
             where: { codatId },
