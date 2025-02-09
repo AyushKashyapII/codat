@@ -32,6 +32,7 @@ model Codat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([codatId])
   @@index([authorId, codatIsPublic])
   @@index([collectionId, createdAt])
 }
@@ -72,7 +73,6 @@ model Profile {
   email              String       @unique
   phoneNumber        String?      @unique
   name               String?      @default("Codat Profile") @unique
-  password           String?
   image              String?      @db.Text
   attachedAiSearcher AiSearcher?  @relation("AiSearcher")
   teamsPartsOf       Teams[]      @relation("TeamMembers")
@@ -81,12 +81,15 @@ model Profile {
   codatsAuthored     Codat[]      @relation("CodatAuthor")
   codatsSaved        Codat[]      @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
+  password           String?
+  token              String?      @unique @default(uuid())
 
   usersFollowed      UserFollow[] @relation("UserFollowing")
   usersFollowing     UserFollow[] @relation("UserFollowed")
 
   @@index([id])
   @@index([name])
+  @@index([token])
 }
 
 model UserFollow {

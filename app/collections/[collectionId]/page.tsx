@@ -5,22 +5,12 @@ import { useRouter, useParams } from "next/navigation";
 import axios from "axios";
 import Loader from "@/components/loader";
 import { motion } from "framer-motion";
+import { useModel } from "@/hooks/user-model-store";
 
-interface Codats {
-  collectionName: string,
-  collectionDesc: string,
-  collectionCodats: {
-    codatName: string,
-    codatDescription: string,
-    codatLanguage: string,
-    codatId: string,
-    createdAt: Date,
-    updatedAt: Date
-  }[]
-}
+
 
 const CollectionCodatsPage = () => {
-  const [codats, setCodats] = useState<Codats|null>(null);
+  const {singleCodatCollection,setSingleCodatCollection} = useModel();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
@@ -35,7 +25,7 @@ const CollectionCodatsPage = () => {
       try {
         const res = await axios.get(`/api/collections/${collectionId}`);
         if (res.status === 200) {
-          setCodats(res.data);
+          setSingleCodatCollection(res.data);
         }
       } catch (error) {
         console.error("Error fetching codats", error);
@@ -47,62 +37,63 @@ const CollectionCodatsPage = () => {
     fetchCodats()
   }, [collectionId]);
 
-  if (loading || !codats) {
+  const collection = singleCodatCollection;
+
+  if (loading || !collection) {
     return <Loader />;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white p-8 flex flex-col items-center relative overflow-hidden">
+    <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center relative overflow-hidden">
       <motion.div
-        className="absolute inset-0 bg-pattern opacity-20 pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-800 opacity-40 pointer-events-none"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 0.2 }}
+        animate={{ opacity: 0.4 }}
         transition={{ duration: 1 }}
       />
 
       <motion.h1
-        className="text-5xl font-extrabold mb-4 tracking-wide text-white drop-shadow-lg"
-        initial={{ opacity: 0, y: -30 }}
+        className="text-4xl font-bold mb-6"
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        {codats.collectionName}
+        {collection.collectionName}
       </motion.h1>
 
       <motion.p
-        className="text-gray-300 text-xl mb-6 text-center max-w-3xl"
+        className="text-gray-400 text-lg mb-8 text-center max-w-2xl"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1, delay: 0.2 }}
       >
-        {codats.collectionDesc}
+        {collection.collectionDesc}
       </motion.p>
 
       <motion.button
-        className="px-8 py-4 bg-white text-black font-bold rounded-2xl shadow-2xl hover:bg-gray-300 transition-transform transform hover:scale-110 mb-8"
-        onClick={() => router.push(`/codats/add/${collectionId}`)}
+        className="px-6 py-3 bg-white text-black font-bold rounded-xl shadow-lg hover:bg-gray-300 transition-transform transform hover:scale-105 mb-6"
+        onClick={() => router.push(`/codat/add/${collectionId}`)}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
         Add Codat
       </motion.button>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-6xl">
-        {codats.collectionCodats.map((codat, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl">
+        {collection.collectionCodats.map((codat, index) => (
           <motion.div
             key={codat.codatId}
-            className="bg-gray-800 p-6 rounded-2xl shadow-2xl hover:shadow-3xl transition-transform transform hover:scale-105 hover:border-white border border-gray-600 backdrop-blur-lg"
-            initial={{ opacity: 0, y: 40 }}
+            className="bg-gray-900 p-6 rounded-xl shadow-md hover:shadow-xl transition-transform transform hover:scale-105 border border-gray-700"
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0 }}
+            transition={{ duration: 0.6, delay: index * 0.1 }}
             whileHover={{ scale: 1.05 }}
           >
-            <h2 className="text-3xl font-bold mb-3 text-white">
+            <h2 className="text-2xl font-semibold mb-2 text-white">
               {codat.codatName}
             </h2>
-            <p className="text-gray-400 mb-4 text-sm">
-              {codat.codatDescription}
-            </p>
-            <p className="text-sm text-gray-300 font-mono">
+            <p className="text-gray-400 mb-4">{codat.codatDescription}</p>
+            <p className="text-sm text-gray-300">
               Language: {codat.codatLanguage}
             </p>
             <p className="text-xs text-gray-500 mt-1">
@@ -112,23 +103,14 @@ const CollectionCodatsPage = () => {
               Updated: {new Date(codat.updatedAt).toLocaleDateString()}
             </p>
 
-            <div className="flex justify-between mt-4">
-              <motion.button
-                className="px-5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition transform hover:scale-105"
-                onClick={() => router.push(`/codats/${codat.codatId}`)}
-                whileTap={{ scale: 0.95 }}
-              >
-                View Codat
-              </motion.button>
-
-              <motion.button
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition transform hover:scale-105"
-                onClick={() => router.push(`/codats/edit/${codat.codatId}`)}
-                whileTap={{ scale: 0.95 }}
-              >
-                Edit
-              </motion.button>
-            </div>
+            <motion.button
+              className="mt-4 px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition"
+              onClick={() => router.push(`/codat/${codat.codatId}`)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              View Codat
+            </motion.button>
           </motion.div>
         ))}
       </div>

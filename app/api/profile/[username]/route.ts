@@ -1,8 +1,8 @@
 import { db } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{ username: string }> }) {
-  console.log('Fetching profile for:', );
+export async function GET(req: NextRequest, { params }: { params: Promise<{username: string}>}) {
+
   const { username } = await params;
 
   if (!username) {
