@@ -46,6 +46,7 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
 
         const { code, language, description, title } = requestBody;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const updateData: any = {};
 
         if (language) updateData.codatLanguage = language;
