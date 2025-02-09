@@ -3,7 +3,7 @@
 import React from 'react';
 import { Home, Users, Search, User } from 'lucide-react';
 import {useRouter} from "next/navigation";
-import {UserButton} from "@clerk/nextjs";
+import { AuthButton } from './AuthButton';
 
 const Navbar = () => {
   const router = useRouter();
@@ -72,19 +72,7 @@ const Navbar = () => {
       </div>
 
       {/* Profile */}
-      <button
-        className="group p-2 rounded-full
-          hover:bg-gray-800
-          transition-all duration-300
-          transform hover:scale-110 active:scale-95"
-        onClick={() => router.push('/profile')}
-      >
-        <User
-          size={26}
-          className="text-gray-300 group-hover:text-white
-            transition-colors duration-300"
-        />
-      </button>
+      <AuthButton/>
     </nav>
   );
 };
