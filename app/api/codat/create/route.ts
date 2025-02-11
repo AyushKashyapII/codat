@@ -6,25 +6,6 @@ import { qdrantStore } from '@/lib/qdrantStore';
 import { currentProfile } from '@/lib/current-profile';
 
 export async function POST(req: Request) {
-    
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    // }
-    // const userId = session.user.id;
-    // const currentUser = await db.profile.findUnique({
-    //     where: {
-    //         id: userId,
-    //     },
-    //     select: {
-    //         id: true,
-    //         name: true,
-    //         email: true,
-    //         phoneNumber: true,
-    //         attachedAiSearcher: true,
-    //     },
-    // });
-
     const currentUser = await currentProfile();
 
     if (!currentUser) {
