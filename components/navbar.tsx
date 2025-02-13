@@ -27,7 +27,7 @@ const Navbar = () => {
       label: 'Following',
       hoverColor: 'hover:text-purple-500 hover:bg-purple-500/10',
       activeColor: 'active:text-purple-600 active:bg-purple-600/20',
-      url: "/following"
+      url: "/followings"
     },
     {
       icon: Search,

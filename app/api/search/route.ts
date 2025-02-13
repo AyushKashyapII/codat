@@ -50,6 +50,9 @@ try {
         console.log("This is the codat i was able to find\n" + codat);
         return NextResponse.json(codat);
 } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
-}
+    return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
 }

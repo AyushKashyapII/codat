@@ -5,7 +5,6 @@ import {db} from "@/lib/db";
 export async function GET() {
   try {
     const profile = await currentProfile();
-    console.log(profile);
 
     if (!profile) {
       return NextResponse.json(

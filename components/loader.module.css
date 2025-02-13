@@ -1,0 +1,123 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgb(17, 24, 39);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.loaderContainer {
+    position: relative;
+}
+
+.spinningRing {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    border: 4px solid rgba(59, 130, 246, 0.3);
+    border-top-color: rgb(59, 130, 246);
+    animation: spin 1s linear infinite;
+}
+
+.pulsingCircleContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.pulsingCircle {
+    width: 2rem;
+    height: 2rem;
+    background-color: rgb(59, 130, 246);
+    border-radius: 50%;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.orbitingDotContainer,
+.orbitingDotContainerReverse {
+    position: absolute;
+    inset: 0;
+}
+
+.orbitingDotContainer {
+    animation: spin 3s linear infinite;
+}
+
+.orbitingDotContainerReverse {
+    animation: spinReverse 3s linear infinite;
+}
+
+.orbitingDot {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: rgb(96, 165, 250);
+    border-radius: 50%;
+}
+
+.orbitingDotContainer .orbitingDot {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.orbitingDotContainerReverse .orbitingDot {
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.loadingText {
+    position: absolute;
+    bottom: -2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgb(96, 165, 250);
+    font-weight: 500;
+}
+
+.particle {
+    position: absolute;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: rgba(59, 130, 246, 0.2);
+    border-radius: 50%;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes spinReverse {
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.9);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0.2;
+    }
+    50% {
+        transform: translateY(-20px) scale(1.2);
+        opacity: 0.4;
+    }
+}

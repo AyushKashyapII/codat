@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 
 export const currentProfile = async() => {
     const {userId}=await auth()
-    console.log('Current user:', userId);
+    // console.log('Current user:', userId);
 
     if(!userId) return null;
 
@@ -13,7 +13,7 @@ export const currentProfile = async() => {
             id: userId
         }
     });
-    console.log('Current profile:', profile);
+    // console.log('Current profile:', profile);
 
     return profile;
 }

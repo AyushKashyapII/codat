@@ -20,6 +20,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{id: 
       return NextResponse.json({ error: "id of user to follow is required" }, { status: 403 })
     }
 
+    const alreadyFollow = await db.userFollow.findFirst({
+      where: {
+        followingId: id,
+        followerId: profile.id
+      }
+    })
+
+    if (alreadyFollow) {
+      return NextResponse.json({ error: "User already following user" }, { status: 403 })
+    }
+
     const follow = await db.userFollow.create({
       data: {
         followingId: id,
