@@ -60,6 +60,7 @@ model Collections {
   collectionOwner    Profile  @relation("CollectionOwner", fields: [collectionOwnerId], references: [id], onDelete: Cascade)
   collectionOwnerId  String
   collectionCodats   Codat[]  @relation("CollectionCodats")
+  collectionColor    String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
