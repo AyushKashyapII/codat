@@ -44,10 +44,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{id: s
             image: true,
           }
         },
-        
+        teamCollections: {
+          select: {
+            collectionId: true,
+            collectionName: true,
+          }
+        },
+        createdAt: true,
+        updatedAt: true,
       }
     })
     
+    if (!team) {
+      return NextResponse.json({ error: "team not found" }, { status: 404 })
+    }
+    
+    return NextResponse.json(team, { status: 200 });
   } catch (e) {
     return NextResponse.json(
       { error: `Internal Server error: ${e}` },
@@ -55,4 +67,41 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{id: s
     );
   }
 }
+
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{id: string}> }) {
+  try {
+    const profile = await currentProfile();
+    console.log(profile);
+    
+    if (!profile) {
+      return NextResponse.json(
+        { error: 'User not logged in' },
+        { status: 403 }
+      )
+    }
+    
+    const { id } = await params;
+    
+    const team = await db.teams.delete({
+      where: {
+        teamId: id,
+        teamOwnerId: profile.id
+      }
+    })
+    
+    if (!team) {
+      return NextResponse.json({ error: "team not found or you are not owner" }, { status: 404});
+    }
+    
+    return NextResponse.json({ status: 200 });
+  } catch (e) {
+    return NextResponse.json(
+      { error: `Internal Server error: ${e}` },
+      { status: 500 }
+    );
+  }
+}
+
+
 

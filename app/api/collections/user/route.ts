@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 
     if (alreadyExist !== null) {
       return NextResponse.json(
-        { error: "collection with same name already exits"},
+        { error: "collections with same name already exits"},
         { status: 403 }
       )
     }

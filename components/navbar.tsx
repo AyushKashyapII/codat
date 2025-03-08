@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react';
-import { Home, Users, Search, User } from 'lucide-react';
+import { Home, Users, Search,  } from 'lucide-react';
 import {useRouter} from "next/navigation";
 import { AuthButton } from './AuthButton';
 
@@ -28,6 +28,13 @@ const Navbar = () => {
       hoverColor: 'hover:text-purple-500 hover:bg-purple-500/10',
       activeColor: 'active:text-purple-600 active:bg-purple-600/20',
       url: "/followings"
+    },
+    {
+      icon: Users,
+      label: 'Teams',
+      hoverColor: 'hover:text-orange-500 hover:bg-orange-500/10',
+      activeColor: 'active:text-orange-600 active:bg-orange-600/20',
+      url: "/teams"
     },
     {
       icon: Search,

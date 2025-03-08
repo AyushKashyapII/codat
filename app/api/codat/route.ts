@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const aiDescritpion = await aiDesc(code, language ) || '';
     const aiFunction = await aiFunc(code, language) || '';
     
-    // const collection = db.collections.findUnique({
+    // const collections = db.collections.findUnique({
     //     where:{
     //         collectionId:collectionId
     //     }

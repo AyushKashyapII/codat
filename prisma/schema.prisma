@@ -25,7 +25,6 @@ model Codat {
   codatAIDesc         String
   codatAIFunc         String
   codatsSavedBy       Profile[]   @relation("CodatSaved")
-  codatTeamsPartOf    Teams[]     @relation("TeamCodats")
   codatsCollectionPartOf Collections? @relation("CollectionCodats", fields: [collectionId], references: [collectionId])
   collectionId        String?
 
@@ -44,7 +43,7 @@ model Teams {
   teamOwnerId    String
   teamOwner      Profile   @relation("TeamOwner", fields: [teamOwnerId], references: [id], onDelete: Cascade)
   teamModerators Profile[] @relation("TeamModerators")
-  teamCodats     Codat[]   @relation("TeamCodats")
+  teamCollections     Collections[]   @relation("TeamCollections")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -60,7 +59,8 @@ model Collections {
   collectionOwner    Profile  @relation("CollectionOwner", fields: [collectionOwnerId], references: [id], onDelete: Cascade)
   collectionOwnerId  String
   collectionCodats   Codat[]  @relation("CollectionCodats")
-  collectionColor    String
+  collectionColor    String?
+  collectionTeamPartOf Teams[] @relation("TeamCollections")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

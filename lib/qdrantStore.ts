@@ -69,7 +69,7 @@ while (currentTry < maxRetries) {
     await qdrantClient.createCollection(collectionName, collectionConfig);
     console.log(`Created new collection: ${collectionName}`);
     
-    // Validate collection was created
+    // Validate collections was created
     await new Promise(resolve => setTimeout(resolve, 2000)); // Wait longer
     const newCollection = await qdrantClient.getCollection(collectionName);
     
