@@ -3,6 +3,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {db} from "@/lib/db";
 import {currentProfile} from "@/lib/current-profile";
+import { stringify } from "querystring";
 
 export async function GET() {
   try {
@@ -45,7 +46,8 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const profile = await currentProfile();
-
+    console.log("hitting post");
+    console.log(profile);
     if (!profile) {
       return NextResponse.json(
         { error: 'User not logged in' },
@@ -67,6 +69,7 @@ export async function POST(req: NextRequest) {
         collectionName
       }
     })
+    console.log("few checks done");
 
     if (alreadyExist !== null) {
       return NextResponse.json(
@@ -75,13 +78,18 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    console.log("createing ")
+
     const collection = await db.collections.create({
       data: {
         collectionDesc,
         collectionName,
-        collectionOwnerId: profile.id
+        collectionOwnerId: profile.id,
+        collectionColor: "#FF5733",
       }
     })
+
+    console.log("created",collection)
 
     return NextResponse.json(collection, { status: 200 })
   } catch (e) {
