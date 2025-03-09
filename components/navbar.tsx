@@ -30,6 +30,13 @@ const Navbar = () => {
       url: "/followings",
     },
     {
+      icon: Users,
+      label: "Teams",
+      hoverColor: "hover:text-orange-500 hover:bg-orange-500/10",
+      activeColor: "active:text-orange-600 active:bg-orange-600/20",
+      url: "/teams",
+    },
+    {
       icon: Search,
       label: "Search",
       hoverColor: "hover:text-red-500 hover:bg-red-500/10",
