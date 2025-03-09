@@ -27,6 +27,8 @@ model Codat {
   codatsSavedBy          Profile[]    @relation("CodatSaved")
   codatsCollectionPartOf Collections? @relation("CollectionCodats", fields: [collectionId], references: [collectionId])
   collectionId           String?
+  codatTags              String[]
+  codatLikes             Int          @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
