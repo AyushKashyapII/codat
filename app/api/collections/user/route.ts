@@ -63,20 +63,19 @@ export async function POST(req: NextRequest) {
         { status: 403 }
       )
     }
-
-    const alreadyExist = await db.collections.findFirst({
-      where: {
-        collectionName
-      }
-    })
+    // const alreadyExist = await db.collections.findFirst({
+    //   where: {
+    //     collectionName
+    //   }
+    // })
     console.log("few checks done");
 
-    if (alreadyExist !== null) {
-      return NextResponse.json(
-        { error: "collections with same name already exits"},
-        { status: 403 }
-      )
-    }
+    // if (alreadyExist !== null) {
+    //   return NextResponse.json(
+    //     { error: "collections with same name already exits"},
+    //     { status: 403 }
+    //   )
+    // }
 
     console.log("createing ")
 

@@ -3,10 +3,27 @@
 import React from "react";
 import { Home, Users, Search, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { AuthButton } from "./AuthButton";
 
 const Navbar = () => {
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const gettingTheCodat = async () => {
+    if (!searchQuery.trim()) return;
+
+    const response = await fetch("/api/search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query: searchQuery }),
+    });
+
+    const data = await response.json();
+    router.push(`/codat/${data.codatId}`);
+  };
   const navButtons = [
     {
       icon: Home,
@@ -81,19 +98,21 @@ const Navbar = () => {
         )}
       </div> */}
 
-      {/* search bar  */}
-      <div className="flex items-center space-x-6 mb-30px">
-        <button onClick={() => router.push("/api/search")}>
+      {/* Search Bar */}
+      <div className="flex items-center space-x-6">
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-[30vw] h-8 p-2 rounded-lg text-black"
+        />
+        <button onClick={gettingTheCodat}>
           <Search
             size={22}
             className="text-gray-400 hover:text-white transition-colors"
           />
         </button>
-        <input
-          type="text"
-          placeholder="Search..."
-          className="w-[30vw] h-6 p-4 rounded-lg"
-        />
       </div>
 
       {/* create a codat button  */}
