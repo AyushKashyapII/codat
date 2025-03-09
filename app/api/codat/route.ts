@@ -4,6 +4,7 @@ import { aiDesc } from '@/lib/codatAIDescription';
 import { aiFunc } from '@/lib/codatAIFunction';
 import { qdrantStore } from '@/lib/qdrantStore';
 import { currentProfile } from '@/lib/current-profile';
+import { aiTags } from '@/lib/codatAITags';
 
 export async function POST(req: Request) {
     const currentUser = await currentProfile();
@@ -41,7 +42,9 @@ export async function POST(req: Request) {
     }
     const aiDescritpion = await aiDesc(code, language ) || '';
     const aiFunction = await aiFunc(code, language) || '';
-    
+    const aiTagsData = await aiTags(code, language);
+    const aiTagsResult = aiTagsData?.split(',').map(tag => tag.trim()).filter(tag => tag !== '');
+
     // const collections = db.collections.findUnique({
     //     where:{
     //         collectionId:collectionId
@@ -61,6 +64,7 @@ export async function POST(req: Request) {
         codatDescription: description,
         codatAIDesc: aiDescritpion,
         codatAIFunc: aiFunction,
+        codatTags: aiTagsResult,
         codatIsPublic: false,
         codatsCollectionPartOf: {
             connect: {
@@ -105,3 +109,5 @@ export async function POST(req: Request) {
     console.log('Codat saved successfully:', codat);
     return NextResponse.json({ message: 'Codat saved successfully', codat }, { status: 200 });
 }
+
+//["linked list", "memory allocation", "structure", "data structure", "dynamic memory allocation", "c", "programming", "coding", " algorithms", "data structures", "DSA"]
