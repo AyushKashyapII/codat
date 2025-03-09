@@ -15,6 +15,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{id: 
     }
 
     const { id } = await params
+    
+    if (id == profile.id) {
+      return NextResponse.json({ error: "Can't follow yourself" }, { status: 403 });
+    }
 
     if (!id) {
       return NextResponse.json({ error: "id of user to follow is required" }, { status: 403 })

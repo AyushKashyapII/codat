@@ -7,10 +7,8 @@ import Loader from "@/components/loader";
 import { motion } from "framer-motion";
 import { useModel } from "@/hooks/user-model-store";
 
-
-
 const CollectionCodatsPage = () => {
-  const {singleCodatCollection,setSingleCodatCollection} = useModel();
+  const { singleCodatCollection, setSingleCodatCollection } = useModel();
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
@@ -34,7 +32,7 @@ const CollectionCodatsPage = () => {
       }
     }
 
-    fetchCodats()
+    fetchCodats();
   }, [collectionId]);
 
   const collection = singleCodatCollection;
@@ -86,7 +84,7 @@ const CollectionCodatsPage = () => {
             className="bg-gray-900 p-6 rounded-xl shadow-md hover:shadow-xl transition-transform transform hover:scale-105 border border-gray-700"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
+            transition={{ duration: 0.15, delay: index * 0.1 }}
             whileHover={{ scale: 1.05 }}
           >
             <h2 className="text-2xl font-semibold mb-2 text-white">

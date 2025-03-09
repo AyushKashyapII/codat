@@ -45,7 +45,7 @@ const CollectionsPage = () => {
 
   const handleAddCollection = async () => {
     if (!collectionName || !collectionDesc) {
-      alert("collection name and description are required!");
+      alert("collections name and description are required!");
       return;
     }
     try {
@@ -60,10 +60,10 @@ const CollectionsPage = () => {
         setCollectionName("");
         setCollectionDesc("");
       } else {
-        alert("Failed to add collection");
+        alert("Failed to add collections");
       }
     } catch (error) {
-      console.error("Error adding collection", error);
+      console.error("Error adding collections", error);
     } finally {
       setLoading(false);
     }
