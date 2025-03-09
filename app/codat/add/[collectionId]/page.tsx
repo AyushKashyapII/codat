@@ -58,7 +58,7 @@ const CreateCodat: NextPage = () => {
     if (!collectionId || !formData.code || !formData.language || !formData.title) return;
     try {
       setLoading(true)
-      const res = await axios.post("/api/codat/create", {
+      const res = await axios.post("/api/codat/", {
         title: formData.title,
         description: formData.description,
         code: formData.code,
