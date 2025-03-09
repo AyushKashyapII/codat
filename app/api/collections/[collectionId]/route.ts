@@ -25,6 +25,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{colle
             codatId: true,
             codatDescription: true,
             codatLanguage: true,
+            codatAuthor:true,
+            codatCode:true,
             createdAt: true,
             updatedAt: true,
           }

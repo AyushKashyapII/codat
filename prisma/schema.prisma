@@ -14,20 +14,20 @@ datasource db {
 }
 
 model Codat {
-  codatId             String      @id @default(uuid())
-  codatName           String
-  codatDescription    String
-  codatAuthor         Profile     @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  authorId            String
-  codatCode           String      @db.Text
-  codatLanguage       String      @db.VarChar(50)
-  codatIsPublic       Boolean     @default(true)
-  codatAIDesc         String
-  codatAIFunc         String
-  codatsSavedBy       Profile[]   @relation("CodatSaved")
-  codatTeamsPartOf    Teams[]     @relation("TeamCodats")
+  codatId                String       @id @default(uuid())
+  codatName              String
+  codatDescription       String
+  codatAuthor            Profile      @relation("CodatAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId               String
+  codatCode              String       @db.Text
+  codatLanguage          String       @db.VarChar(50)
+  codatIsPublic          Boolean      @default(true)
+  codatAIDesc            String
+  codatAIFunc            String
+  codatsSavedBy          Profile[]    @relation("CodatSaved")
+  codatTeamsPartOf       Teams[]      @relation("TeamCodats")
   codatsCollectionPartOf Collections? @relation("CollectionCodats", fields: [collectionId], references: [collectionId])
-  collectionId        String?
+  collectionId           String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,13 +54,13 @@ model Teams {
 }
 
 model Collections {
-  collectionId       String   @id @default(uuid())
-  collectionName     String
-  collectionDesc     String
-  collectionOwner    Profile  @relation("CollectionOwner", fields: [collectionOwnerId], references: [id], onDelete: Cascade)
-  collectionOwnerId  String
-  collectionCodats   Codat[]  @relation("CollectionCodats")
-  collectionColor    String
+  collectionId      String  @id @default(uuid())
+  collectionName    String
+  collectionDesc    String
+  collectionOwner   Profile @relation("CollectionOwner", fields: [collectionOwnerId], references: [id], onDelete: Cascade)
+  collectionOwnerId String
+  collectionCodats  Codat[] @relation("CollectionCodats")
+  collectionColor   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,23 +70,23 @@ model Collections {
 }
 
 model Profile {
-  id                 String       @id @default(uuid())
-  email              String       @unique
-  phoneNumber        String?      @unique
-  name               String?      @default("Codat Profile") @unique
-  image              String?      @db.Text
-  attachedAiSearcher AiSearcher?  @relation("AiSearcher")
-  teamsPartsOf       Teams[]      @relation("TeamMembers")
-  teamsOwnerOf       Teams[]      @relation("TeamOwner")
-  teamsModeratorOf   Teams[]      @relation("TeamModerators")
-  codatsAuthored     Codat[]      @relation("CodatAuthor")
-  codatsSaved        Codat[]      @relation("CodatSaved")
+  id                 String        @id @default(uuid())
+  email              String        @unique
+  phoneNumber        String?       @unique
+  name               String?       @unique @default("Codat Profile")
+  image              String?       @db.Text
+  attachedAiSearcher AiSearcher?   @relation("AiSearcher")
+  teamsPartsOf       Teams[]       @relation("TeamMembers")
+  teamsOwnerOf       Teams[]       @relation("TeamOwner")
+  teamsModeratorOf   Teams[]       @relation("TeamModerators")
+  codatsAuthored     Codat[]       @relation("CodatAuthor")
+  codatsSaved        Codat[]       @relation("CodatSaved")
   codatsCollections  Collections[] @relation("CollectionOwner")
   password           String?
-  token              String?      @unique @default(uuid())
+  token              String?       @unique @default(uuid())
 
-  usersFollowed      UserFollow[] @relation("UserFollowing")
-  usersFollowing     UserFollow[] @relation("UserFollowed")
+  usersFollowed  UserFollow[] @relation("UserFollowing")
+  usersFollowing UserFollow[] @relation("UserFollowed")
 
   @@index([id])
   @@index([name])
@@ -94,12 +94,12 @@ model Profile {
 }
 
 model UserFollow {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   followerId  String
   followingId String
 
-  follower    Profile  @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
-  following   Profile  @relation("UserFollowed", fields: [followingId], references: [id], onDelete: Cascade)
+  follower  Profile @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following Profile @relation("UserFollowed", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
 }
