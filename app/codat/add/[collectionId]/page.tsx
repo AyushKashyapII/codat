@@ -29,10 +29,10 @@ const CreateCodat: NextPage = () => {
   const params = useParams();
   const collectionId = params.collectionId;
 
-  const languages = [
-    'JavaScript', 'Python', 'Java', 'C++', 'Ruby',
-    'Go', 'Rust', 'TypeScript', 'PHP', 'Swift'
-  ] as const;
+  // const languages = [
+  //   'JavaScript', 'Python', 'Java', 'C++', 'Ruby',
+  //   'Go', 'Rust', 'TypeScript', 'PHP', 'Swift'
+  // ] as const;
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -55,14 +55,13 @@ const CreateCodat: NextPage = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!collectionId || !formData.code || !formData.language || !formData.title) return;
+    if (!collectionId || !formData.code || !formData.title) return;
     try {
       setLoading(true)
       const res = await axios.post("/api/codat/", {
         title: formData.title,
         description: formData.description,
         code: formData.code,
-        language: formData.language,
         collectionId
       })
 
@@ -122,7 +121,7 @@ const CreateCodat: NextPage = () => {
               />
             </div>
 
-            <div>
+            {/* <div>
               <label htmlFor="language" className="block text-sm font-medium mb-2">Language</label>
               <select
                 id="language"
@@ -137,7 +136,7 @@ const CreateCodat: NextPage = () => {
                   <option key={lang} value={lang}>{lang}</option>
                 ))}
               </select>
-            </div>
+            </div> */}
 
             <div>
               <div className="flex justify-between items-center mb-2">
