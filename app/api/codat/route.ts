@@ -85,24 +85,27 @@ export async function POST(req: Request) {
       textToPassToAI: true
     }
   });
+  console.log(aiSearcherData);
   
-  const currentData = aiSearcherData?.textToPassToAI
-    ? JSON.parse(JSON.stringify(aiSearcherData.textToPassToAI))
-    : [];
+  let currentData: { id: string, text: string }[] = [];
+
+  if (aiSearcherData && Array.isArray(aiSearcherData.textToPassToAI)) {
+    currentData = aiSearcherData.textToPassToAI as { id: string, text: string }[];
+  }
     
   await db.aiSearcher.update({
     where: {
       attachedProfileId: currentUser.id
     },
     data: {
-      textToPassToAI: JSON.stringify([
+      textToPassToAI: [
         ...currentData,
         {
           id: codat.codatId,
           text: aiDescritpion
         }
-      ])
-    },
+      ]
+    }
   });
   
   if (!currentUser.name) {
