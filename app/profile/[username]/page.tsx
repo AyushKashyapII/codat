@@ -41,6 +41,56 @@ import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
 import { ArrowRight, Code, Folder, UserPlus, Users, Pencil, X, Check } from "lucide-react";
 import SkeletonLoader from "@/components/Skeletonloader";
+import { createHighlighter } from "shiki";
+
+const useHighlightedCode = (code: string, language: string) => {
+  const [highlightedCode, setHighlightedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const highlightCode = async () => {
+      try {
+        const highlighter = await createHighlighter({
+          themes: ["github-dark"],
+          langs: [language.toLowerCase()],
+        });
+
+        const highlighted = highlighter.codeToHtml(code, {
+          lang: language.toLowerCase(),
+          theme: "github-dark",
+        });
+
+        setHighlightedCode(highlighted);
+      } catch (error) {
+        console.error("Failed to highlight code:", error);
+        setHighlightedCode(`<pre><code>${code}</code></pre>`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    highlightCode();
+  }, [code, language]);
+
+  return { highlightedCode, isLoading };
+};
+
+const CodeBlock = ({ code, language }: { code: string; language: string }) => {
+  const { highlightedCode, isLoading } = useHighlightedCode(code, language);
+
+  if (isLoading) {
+    return <div className="bg-[#0d1117] p-4 rounded-md h-24 animate-pulse" />;
+  }
+
+  return (
+    <div className="p-4 rounded-md overflow-auto text-sm bg-[#0d1117] max-h-[calc(100vh-12rem)] shadow-lg w-full">
+      <div
+        className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0 [&_.shiki]:!bg-transparent"
+        dangerouslySetInnerHTML={{ __html: highlightedCode }}
+      />
+    </div>
+  );
+};
 
 export default function ProfilePage() {
   const { profile, setProfile } = useModel();
@@ -519,11 +569,14 @@ export default function ProfilePage() {
 
                                 {/* Code snippet preview */}
                                 <div className="bg-black/30 rounded p-3 my-3 overflow-hidden max-h-32 font-mono text-sm text-gray-200">
-                                  <pre className="line-clamp-5">
-                                    {codat.codatCode?.length > 150
-                                      ? codat.codatCode.substring(0, 150) + "..."
-                                      : codat.codatCode || "No Code Available"}
-                                  </pre>
+                                  <CodeBlock
+                                    code={
+                                      codat.codatCode?.length > 150
+                                        ? codat.codatCode.substring(0, 150) + "..."
+                                        : codat.codatCode || "No Code Available"
+                                    }
+                                    language={codat.codatLanguage}
+                                  />
                                 </div>
 
                                 {/* Author info */}
