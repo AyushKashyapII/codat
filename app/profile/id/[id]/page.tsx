@@ -1,4 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Code, Folder, UserPlus, Users } from "lucide-react";
+import SkeletonLoader from "@/components/Skeletonloader";
+import axios from "axios";
+import { useParams } from "next/navigation";
+
 interface CodeSnippet {
   title: string;
   code: string;
@@ -8,25 +15,6 @@ interface CodeSnippet {
   stars: number;
   difficulty: string;
 }
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import {
-  Code,
-  Search,
-  Globe,
-  Users,
-  ChevronDown,
-  Star,
-  Clock,
-  UserPlus,
-  ArrowRight,
-  Folder,
-} from "lucide-react";
-import Head from "next/head";
-import { useRouter } from "next/navigation";
-import { useModel } from "@/hooks/user-model-store";
-import SkeletonLoader from "../Skeletonloader";
-
 interface Collection {
   createdAt: Date;
   updatedAt: Date;
@@ -37,7 +25,6 @@ interface Collection {
     collectionCodats: number;
   };
 }
-
 interface Codat {
   codatId: string;
   codatName: string;
@@ -54,12 +41,82 @@ interface Codat {
   updatedAt: string;
 }
 
-export default function HomePage() {
-  const [typedText, setTypedText] = useState("");
+const ProfilePageID = () => {
+  const router = useRouter();
+  const { id } = useParams() as { id: string };
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`/api/profile/id/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch profile");
+
+        const data = await response.json();
+        //console.log("Profile data:", data);
+        setProfileData(data);
+
+        // Check if the profile contains collections
+        if (data.codatsCollections && data.codatsCollections.length > 0) {
+          // Extract collection IDs from the profile data
+          const userCollections = data.codatsCollections;
+          setCollections(userCollections);
+
+          // Fetch codats for each collection
+          const codatPromises = userCollections.map((collection: Collection) =>
+            axios.get(`/api/collections/${collection.collectionId}`)
+          );
+
+          const codatResponses = await Promise.all(codatPromises);
+          console.log("Codat responses for user collections:", codatResponses);
+
+          // Process the codats the same way as before
+          const codatsMap: Record<string, Codat[]> = {};
+          let allUserCodats: Codat[] = [];
+
+          codatResponses.forEach((response, index) => {
+            if (response.status === 200) {
+              const collectionId = userCollections[index].collectionId;
+
+              if (
+                response.data.collectionCodats &&
+                Array.isArray(response.data.collectionCodats)
+              ) {
+                codatsMap[collectionId] = response.data.collectionCodats;
+                allUserCodats = [
+                  ...allUserCodats,
+                  ...response.data.collectionCodats,
+                ];
+              } else if (Array.isArray(response.data)) {
+                codatsMap[collectionId] = response.data;
+                allUserCodats = [...allUserCodats, ...response.data];
+              }
+            }
+          });
+
+          console.log("Codats map:", codatsMap);
+          setAllCodats(codatsMap);
+          setFlattenedCodats(allUserCodats);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [id]);
+
+  const [error, setError] = useState<string | null>(null);
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [flattenedCodats, setFlattenedCodats] = useState<Codat[]>([]);
   const sizePattern = ["small", "medium", "large", "medium", "small", "large"];
-
+  //const router = useRouter();
   const sizeClasses = {
     small: "col-span-1 row-span-1",
     medium: "col-span-1 row-span-2",
@@ -71,92 +128,8 @@ export default function HomePage() {
     return sizePattern[patternIndex];
   };
 
-  const [isMounted, setIsMounted] = useState(false);
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  const welcomeText = "Welcome to Codat";
-  const router = useRouter();
-
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setLoading(true);
-    async function fetchCollections() {
-      try {
-        const res = await axios.get<Collection[]>(`/api/collections/user`);
-
-        if (res.status === 200) {
-          setCollections(res.data);
-
-          // codats from each individual collection
-          const codatPromises = res.data.map((collectionItem) =>
-            axios.get(`/api/collections/${collectionItem.collectionId}`)
-          );
-
-          const codatResponses = await Promise.all(codatPromises);
-          console.log("all codat responses", codatResponses);
-
-          // Create an object with collection IDs as keys and their codats as values
-          const codatsMap: Record<string, Codat[]> = {};
-          let allUserCodats: Codat[] = [];
-
-          codatResponses.forEach((response, index) => {
-            if (response.status === 200) {
-              // Check if the response has collectionCodats property
-              if (
-                response.data.collectionCodats &&
-                Array.isArray(response.data.collectionCodats)
-              ) {
-                // Store the codats array in the map
-                codatsMap[res.data[index].collectionId] =
-                  response.data.collectionCodats;
-                // Add all codats to the flattened array
-                allUserCodats = [
-                  ...allUserCodats,
-                  ...response.data.collectionCodats,
-                ];
-              } else if (Array.isArray(response.data)) {
-                // Handle case where response.data is already an array of codats
-                codatsMap[res.data[index].collectionId] = response.data;
-                allUserCodats = [...allUserCodats, ...response.data];
-              }
-            }
-          });
-
-          console.log("codats map", codatsMap);
-          setAllCodats(codatsMap);
-          setFlattenedCodats(allUserCodats);
-        } else {
-          router.push("/");
-        }
-      } catch (error) {
-        console.error("Error fetching collections", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchCollections();
-  }, []);
-
-  useEffect(() => {
-    let currentText = "";
-    let index = 0;
-    const typingInterval = setInterval(() => {
-      if (index < welcomeText.length) {
-        currentText += welcomeText[index];
-        setTypedText(currentText);
-        index++;
-      } else {
-        clearInterval(typingInterval);
-      }
-    }, 100);
-
-    return () => clearInterval(typingInterval);
-  }, []);
+  //const [loading, setLoading] = useState(false);
 
   const teams = [
     { name: "Algorithm Enthusiasts", members: 8 },
@@ -168,41 +141,6 @@ export default function HomePage() {
     { name: "Hackathon Squad", members: 8 },
     { name: "DSA Mentors", members: 4 },
   ];
-
-  const features = [
-    {
-      icon: Code,
-      title: "Code Collection",
-      description: "Save and organize your reusable code snippets",
-      hoverClass: "hover:border-blue-500 hover:text-blue-500",
-      bgClass: "hover:bg-blue-500/10",
-    },
-    {
-      icon: Globe,
-      title: "Cross-Language Conversion",
-      description: "AI-powered code translation between languages",
-      hoverClass: "hover:border-green-500 hover:text-green-500",
-      bgClass: "hover:bg-green-500/10",
-    },
-    {
-      icon: Search,
-      title: "Semantic Search",
-      description: "Intelligent code discovery using AI",
-      hoverClass: "hover:border-red-500 hover:text-red-500",
-      bgClass: "hover:bg-red-500/10",
-    },
-    {
-      icon: Users,
-      title: "Community",
-      description: "Follow and explore other developers' collections",
-      hoverClass: "hover:border-purple-500 hover:text-purple-500",
-      bgClass: "hover:bg-purple-500/10",
-    },
-  ];
-
-  if (!isMounted) {
-    return null;
-  }
 
   const getCardSize = (codat: Codat | undefined) => {
     const codeDescriptionLength = codat?.codatDescription?.length || 0;
@@ -232,103 +170,47 @@ export default function HomePage() {
     return colors[language] || "bg-gray-900/30";
   };
 
+  if (loading) return <div>Loading profile...</div>;
+  if (!profileData) return <div>Profile not found</div>;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white overflow-hidden relative flex flex-col">
-      <div className="">
-        <Head>
-          <title>Codat - Code Collection & Sharing Platform</title>
-          <meta
-            name="description"
-            content="Revolutionize the way you manage and share code"
-          />
-        </Head>
+    <div className="min-h-screen bg-[#0F1220] text-white">
+      <div className="max-w-8xl mx-auto p-6">
+        {/* Profile Header */}
+        <div className="bg-[#1A2035] rounded-lg p-6 shadow-lg mb-6 w-full">
+          <div className="flex justify-between items-center">
+            {/* Left side - Profile info */}
+            <div className="flex items-center gap-6">
+              {profileData.image && (
+                <img
+                  src={profileData.image}
+                  alt={profileData.name as string}
+                  className="w-24 h-24 rounded-full border-2 border-[#3E95FF]"
+                />
+              )}
+              <div>
+                <h1 className="text-3xl font-bold">{profileData.name}</h1>
+                <p className="text-[#B8C0D2]">{profileData.email}</p>
+              </div>
+            </div>
 
-        {/* Animated Background Particles */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(100)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute bg-white/5 rounded-full animate-pulse"
-              style={{
-                width: `${Math.random() * 3}px`,
-                height: `${Math.random() * 3}px`,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 5}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Main Content */}
-        <div className="flex-grow container mx-auto px-6 flex flex-col justify-center items-center text-center relative z-10">
-          {/* Header */}
-          <header className="mb-16 mt-10">
-            <h1 className="text-6xl font-bold tracking-tight animate-slide-in-top">
-              {typedText}
-              <span className="animate-pulse">|</span>
-            </h1>
-            <p className="mt-6 text-2xl text-gray-300 animate-slide-in-bottom max-w-3xl mx-auto">
-              Revolutionize the way you manage, share, and discover code across
-              languages and communities
-            </p>
-          </header>
-
-          {/* Features */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-            {features.map(
-              (
-                { icon: Icon, title, description, hoverClass, bgClass },
-                index
-              ) => (
-                <div
-                  key={title}
-                  className={`group bg-gray-900/50 backdrop-blur-sm p-6 rounded-lg text-center 
-              transition transform hover:scale-105 hover:bg-gray-800/70
-              animate-fade-in border border-transparent 
-              ${hoverClass} ${bgClass}`}
-                  style={{
-                    animationDelay: `${index * 0.2}s`,
-                  }}
-                >
-                  <div className="flex justify-center mb-4">
-                    <Icon
-                      size={48}
-                      className="text-white opacity-80
-                  transition-transform group-hover:scale-110"
-                    />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-2 transition">
-                    {title}
-                  </h3>
-                  <p className="text-gray-400">{description}</p>
+            {/* Right side - Followers/Following */}
+            <div className="bg-[#141B2D] rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="border-r border-gray-700 pr-4">
+                  <h3 className="text-[#3E95FF] font-medium">Following</h3>
+                  <p className="text-xl font-bold">0</p>
                 </div>
-              )
-            )}
-          </div>
-
-          {/* Call to Action */}
-          <div className="flex flex-col items-center">
-            <button
-              className="bg-white text-black px-10 py-4 rounded-full
-            font-bold text-lg hover:bg-gray-200
-            transition transform hover:scale-105
-            animate-bounce-in
-            relative overflow-hidden group mb-8"
-            >
-              Get Started
-            </button>
-
-            {/* Scroll Indicator */}
-            <div className="animate-bounce">
-              <ChevronDown size={32} className="text-white/50" />
+                <div>
+                  <h3 className="text-[#3E95FF] font-medium">Followers</h3>
+                  <p className="text-xl font-bold">0</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-6 py-16 relative z-10 ">
-        <h2 className="text-4xl font-bold mb-12 text-center">Explore Codat</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
         {loading ? (
           <SkeletonLoader />
@@ -366,7 +248,7 @@ export default function HomePage() {
                         {collection.collectionName}
                       </span>
                       <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded-full">
-                        {collection._count.collectionCodats}
+                        {collection._count?.collectionCodats}
                       </span>
                     </div>
                   ))}
@@ -519,4 +401,6 @@ export default function HomePage() {
       </div>
     </div>
   );
-}
+};
+
+export default ProfilePageID;

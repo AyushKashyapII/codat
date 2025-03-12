@@ -1,17 +1,21 @@
-import { db } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
+// app/api/profile/route.ts
+import { NextResponse } from "next/server";
+import { currentProfile } from "@/lib/current-profile";
+import { db } from "@/lib/db";
 
-export async function GET(req: NextRequest, { params }: { params: Promise<{username: string}>}) {
-
-  const { username } = await params;
-
-  if (!username) {
-    return NextResponse.json({ error: 'Invalid username parameter' }, { status: 400 });
-  }
-
+export async function GET() {
   try {
-    const profile = await db.profile.findUnique({
-      where: { name: username },
+    const profile = await currentProfile();
+    
+    if (!profile) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    
+    const fullProfile = await db.profile.findUnique({
+      where: { 
+        id: profile.id 
+      },
       include: {
         codatsAuthored: true,
         codatsSaved: true,
@@ -26,14 +30,14 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{usern
         },
       },
     });
-
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
+    
+    if (!fullProfile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
     }
-
-    return NextResponse.json(profile, { status: 200 });
+    
+    return NextResponse.json(fullProfile);
   } catch (error) {
-    console.error('Error fetching profile:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Error fetching profile:", error);
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

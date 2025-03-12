@@ -1,29 +1,101 @@
 "use client";
 
 import React from "react";
-import { Home, Users, Search, User } from "lucide-react";
+import { Home, Users, Search, User, LayoutDashboard } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthButton } from "./AuthButton";
+import { useAuth } from "@clerk/nextjs";
 
 const Navbar = () => {
   const router = useRouter();
+  const { userId } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
 
   const gettingTheCodat = async () => {
-    if (!searchQuery.trim()) return;
+    try {
+      if (!searchQuery.trim()) return;
 
-    const response = await fetch("/api/search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ query: searchQuery }),
-    });
+      if (searchQuery.startsWith("@")) {
+        const username = searchQuery.substring(1);
+        const response = await fetch(`/api/search/${username}`);
 
-    const data = await response.json();
-    router.push(`/codat/${data.codatId}`);
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const users = await response.json();
+
+        const profileFull = await fetch(`/api/profile/id/${users[0].id}`);
+        console.log(profileFull);
+
+        console.log("API response:", users);
+
+        if (!users || users.length === 0) {
+          console.error("No user found with that username");
+
+          return;
+        }
+        const user = users[0];
+
+        router.push(`/profile/id/${user.id}`);
+      } else {
+        const response = await fetch("/api/search", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: searchQuery }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(data, "dataaaaaa");
+
+        if (!data || !data.codatId) {
+          console.error("No codat found with that query");
+
+          return;
+        }
+
+        router.push(`/codat/${data.codatId}`);
+      }
+    } catch (error) {
+      console.error("Error in search:", error);
+    }
   };
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        if (!userId) {
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(`/api/profile`);
+        if (response.ok) {
+          const profileData = await response.json();
+          console.log("Profile data:", profileData);
+          setProfile(profileData);
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [userId]);
+
+  const profileName = profile?.name || "guest";
+
   const navButtons = [
     {
       icon: Home,
@@ -105,6 +177,11 @@ const Navbar = () => {
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              gettingTheCodat();
+            }
+          }}
           className="w-[30vw] h-8 p-2 rounded-lg text-black"
         />
         <button onClick={gettingTheCodat}>
@@ -134,6 +211,32 @@ const Navbar = () => {
                 group-hover:-translate-y-1"
           />
           <span className="font-medium tracking-wide">Create a Codat</span>
+        </button>
+      </div>
+
+      <div className="flex items-center space-x-4">
+        <button
+          className="flex items-center space-x-3 
+              text-gray-200 
+              hover:text-blue-500 hover:bg-blue-500/10
+              active:text-blue-600 active:bg-blue-600/20
+              transition-all duration-300 
+              transform hover:scale-105 active:scale-95 
+              rounded-lg p-2
+              "
+          onClick={() => {
+            const profilePath = profile?.name
+              ? `/profile/${profile.name}`
+              : "/profile/guest";
+            router.push(profilePath);
+          }}
+        >
+          <LayoutDashboard
+            size={22}
+            className="transition-transform duration-300
+                group-hover:-translate-y-1"
+          />
+          <span className="font-medium tracking-wide">Dashboard</span>
         </button>
       </div>
 

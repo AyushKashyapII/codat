@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useParams, useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { useUser } from "@clerk/nextjs"
-import axios from "axios"
-import { useModel } from "@/hooks/user-model-store"
-import { createHighlighter } from "shiki"
-import Loader from "@/components/loader"
-import { ArrowLeft, Code, FileText } from "lucide-react"
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { useModel } from "@/hooks/user-model-store";
+import { createHighlighter } from "shiki";
+import Loader from "@/components/loader";
+import { ArrowLeft, Code, FileText } from "lucide-react";
 
 const useHighlightedCode = (code: string, language: string) => {
-  const [highlightedCode, setHighlightedCode] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
+  const [highlightedCode, setHighlightedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const highlightCode = async () => {
@@ -20,33 +20,33 @@ const useHighlightedCode = (code: string, language: string) => {
         const highlighter = await createHighlighter({
           themes: ["github-dark"],
           langs: [language.toLowerCase()],
-        })
+        });
 
         const highlighted = highlighter.codeToHtml(code, {
           lang: language.toLowerCase(),
           theme: "github-dark",
-        })
+        });
 
-        setHighlightedCode(highlighted)
+        setHighlightedCode(highlighted);
       } catch (error) {
-        console.error("Failed to highlight code:", error)
-        setHighlightedCode(`<pre><code>${code}</code></pre>`)
+        console.error("Failed to highlight code:", error);
+        setHighlightedCode(`<pre><code>${code}</code></pre>`);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    highlightCode()
-  }, [code, language])
+    highlightCode();
+  }, [code, language]);
 
-  return { highlightedCode, isLoading }
-}
+  return { highlightedCode, isLoading };
+};
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
-  const { highlightedCode, isLoading } = useHighlightedCode(code, language)
+  const { highlightedCode, isLoading } = useHighlightedCode(code, language);
 
   if (isLoading) {
-    return <div className="bg-[#0d1117] p-4 rounded-md h-24 animate-pulse" />
+    return <div className="bg-[#0d1117] p-4 rounded-md h-24 animate-pulse" />;
   }
 
   return (
@@ -56,59 +56,69 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </div>
-  )
-}
+  );
+};
 
 const CodatPage = () => {
-  const router = useRouter()
-  const { codat, setCodat } = useModel()
-  const params = useParams()
-  const codatId = params.codatId as string
-  const [isClient, setIsClient] = useState(false)
-  const [showAIFunction, setShowAIFunction] = useState(false)
-  const { isSignedIn, user } = useUser()
+  const router = useRouter();
+  const { codat, setCodat } = useModel();
+  const params = useParams();
+  const codatId = params.codatId as string;
+  const [isClient, setIsClient] = useState(false);
+  const [showAIFunction, setShowAIFunction] = useState(false);
+  const { isSignedIn, user } = useUser();
 
-  const userEmail = user?.emailAddresses[0].emailAddress
+  const userEmail = user?.emailAddresses[0].emailAddress;
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     async function fetchCodat() {
       try {
-        const res = await axios.get(`/api/codat/${codatId}`)
+        const res = await axios.get(`/api/codat/${codatId}`);
         if (res.status === 200) {
-          setCodat(res.data)
+          setCodat(res.data);
         } else {
-          router.push("/")
+          router.push("/");
         }
       } catch (e) {
-        console.error(e)
-        router.push("/")
+        console.error(e);
+        router.push("/");
       }
     }
 
     if (!codat && codatId) {
-      fetchCodat()
+      fetchCodat();
     }
-  }, [codat, codatId, router, setCodat])
+  }, [codat, codatId, router, setCodat]);
 
-  if (!isClient) return <Loader />
-  if (!codat) return <Loader />
+  if (!isClient) return <Loader />;
+  if (!codat) return <Loader />;
 
-  if (!isSignedIn && !codat?.codatIsPublic && userEmail !== codat?.codatAuthor?.email) {
+  if (
+    !isSignedIn &&
+    !codat?.codatIsPublic &&
+    userEmail !== codat?.codatAuthor?.email
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white p-6">
         <div className="text-center">
           <h1 className="text-3xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-400 text-lg">This Codat is private and cannot be viewed.</p>
-          <Button variant="outline" className="mt-6" onClick={() => router.back()}>
+          <p className="text-gray-400 text-lg">
+            This Codat is private and cannot be viewed.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-6"
+            onClick={() => router.back()}
+          >
             Go Back
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -127,9 +137,16 @@ const CodatPage = () => {
             </div>
             <div className="mt-6">
               <h2 className="text-xl font-semibold mb-2">Details</h2>
-              <p><strong>Language:</strong> {codat.codatLanguage}</p>
-              <p><strong>Author:</strong> {codat.codatAuthor?.email}</p>
-              <p><strong>Visibility:</strong> {codat.codatIsPublic ? "Public" : "Private"}</p>
+              <p>
+                <strong>Language:</strong> {codat.codatLanguage}
+              </p>
+              <p>
+                <strong>Author:</strong> {codat.codatAuthor?.email}
+              </p>
+              <p>
+                <strong>Visibility:</strong>{" "}
+                {codat.codatIsPublic ? "Public" : "Private"}
+              </p>
             </div>
           </div>
 
@@ -143,11 +160,13 @@ const CodatPage = () => {
               >
                 {showAIFunction ? (
                   <>
-                    <Code className="mr-2 h-4 w-4" /> View Code
+                    <Code className="mr-2 h-4 w-4 text-black" />
+                    <p className="text-black">View Code</p>
                   </>
                 ) : (
                   <>
-                    <FileText className="mr-2 h-4 w-4" /> View AI Function
+                    <FileText className="mr-2 h-4 w-4 text-black" />{" "}
+                    <p className="text-black">View AI Function</p>
                   </>
                 )}
               </Button>
@@ -157,17 +176,22 @@ const CodatPage = () => {
               {showAIFunction ? (
                 <>
                   <h2 className="text-xl font-semibold mb-4">AI Function</h2>
-                  <p className="text-gray-300">{codat.codatAIFunc || "AI function not available."}</p>
+                  <p className="text-gray-300">
+                    {codat.codatAIFunc || "AI function not available."}
+                  </p>
                 </>
               ) : (
-                <CodeBlock code={codat.codatCode} language={codat.codatLanguage} />
+                <CodeBlock
+                  code={codat.codatCode}
+                  language={codat.codatLanguage}
+                />
               )}
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CodatPage
+export default CodatPage;

@@ -5,7 +5,6 @@ import { aiFunc } from '@/lib/codatAIFunction';
 import { qdrantStore } from '@/lib/qdrantStore';
 import { currentProfile } from '@/lib/current-profile';
 import { aiTags } from '@/lib/codatAITags';
-import hljs from 'highlight.js'; // Import highlight.js
 
 export async function POST(req: Request) {
   const currentUser = await currentProfile();
@@ -25,10 +24,10 @@ export async function POST(req: Request) {
     }, { status: 400 });
   }
   
-  const { code, title, description, collectionId } = requestBody;
+  const { code, title, description, collectionId, language } = requestBody;
   
   // Validate request body
-  if (!code || !title) {
+  if (!code || !title || !language) {
     return NextResponse.json({
       error: 'Missing required fields',
       receivedBody: requestBody
@@ -37,16 +36,6 @@ export async function POST(req: Request) {
   
   if (!currentUser.id) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  
-  // Use the language-detect module to detect the language
-  let language = "unknown";
-  try {
-    const result = hljs.highlightAuto(code);
-    language = result.language || "unknown";
-    console.log("Detected language:", language);
-  } catch (error) {
-    console.error("Language detection failed:", error);
   }
   
   const aiDescritpion = await aiDesc(code, language) || '';
@@ -85,24 +74,27 @@ export async function POST(req: Request) {
       textToPassToAI: true
     }
   });
+  console.log(aiSearcherData);
   
-  const currentData = aiSearcherData?.textToPassToAI
-    ? JSON.parse(JSON.stringify(aiSearcherData.textToPassToAI))
-    : [];
+  let currentData: { id: string, text: string }[] = [];
+
+  if (aiSearcherData && Array.isArray(aiSearcherData.textToPassToAI)) {
+    currentData = aiSearcherData.textToPassToAI as { id: string, text: string }[];
+  }
     
   await db.aiSearcher.update({
     where: {
       attachedProfileId: currentUser.id
     },
     data: {
-      textToPassToAI: JSON.stringify([
+      textToPassToAI: [
         ...currentData,
         {
           id: codat.codatId,
           text: aiDescritpion
         }
-      ])
-    },
+      ]
+    }
   });
   
   if (!currentUser.name) {

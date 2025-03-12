@@ -6,14 +6,14 @@ import axios from "axios";
 import Loader from "@/components/loader";
 
 interface Collection {
-  createdAt: Date,
-  updatedAt: Date,
-  collectionId: string,
-  collectionName: string,
-  collectionDesc: string,
+  createdAt: Date;
+  updatedAt: Date;
+  collectionId: string;
+  collectionName: string;
+  collectionDesc: string;
   _count: {
-    collectionCodats: number
-  }
+    collectionCodats: number;
+  };
 }
 
 const CollectionsPage = () => {
@@ -75,7 +75,9 @@ const CollectionsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center p-8">
-      <h1 className="text-4xl font-extrabold mb-6 text-center">Your Collections</h1>
+      <h1 className="text-4xl font-extrabold mb-6 text-center">
+        Your Collections
+      </h1>
       <button
         className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold rounded-lg shadow-md hover:from-purple-500 hover:to-blue-500 transition-transform transform hover:scale-105 mb-6"
         onClick={() => setShowPopup(true)}
@@ -86,7 +88,9 @@ const CollectionsPage = () => {
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 border border-gray-700">
-            <h2 className="text-3xl font-bold mb-6 text-center text-white">Add Collection</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center text-white">
+              Add Collection
+            </h2>
             <input
               type="text"
               placeholder="Collection Name"
@@ -120,19 +124,29 @@ const CollectionsPage = () => {
 
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6">
         {collections.length === 0 ? (
-          <p className="text-gray-400 text-center col-span-2">No collections found.</p>
+          <p className="text-gray-400 text-center col-span-2">
+            No collections found.
+          </p>
         ) : (
           collections.map((collection) => (
             <div
               key={collection.collectionId}
               className="p-6 bg-gray-800 rounded-2xl shadow-xl border border-gray-700 hover:border-white hover:shadow-glow transition duration-300 ease-in-out transform hover:scale-105"
             >
-              <h2 className="text-2xl font-bold text-white mb-2">{collection.collectionName}</h2>
-              <p className="text-gray-400 text-sm mb-4">{collection.collectionDesc}</p>
-              <p className="text-gray-400 text-sm mb-4">{collection._count.collectionCodats} Items</p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {collection.collectionName}
+              </h2>
+              <p className="text-gray-400 text-sm mb-4">
+                {collection.collectionDesc}
+              </p>
+              <p className="text-gray-400 text-sm mb-4">
+                {collection._count?.collectionCodats} Items
+              </p>
               <button
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition"
-                onClick={() => router.push(`/collections/${collection.collectionId}`)}
+                onClick={() =>
+                  router.push(`/collections/${collection.collectionId}`)
+                }
               >
                 View Collection
               </button>

@@ -35,8 +35,10 @@ export async function GET(req: NextRequest, { params}: { params: Promise<{name: 
         id: true,
         name: true,
         image: true,
+        email:true,
       }
     })
+    console.log("user ",users)
 
     return NextResponse.json(users, { status: 200 });
   } catch (error) {

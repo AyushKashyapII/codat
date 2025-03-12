@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import {useParams, useRouter} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 export interface CodatFormData {
   title: string;
@@ -9,36 +9,89 @@ export interface CodatFormData {
   code: string;
 }
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { Upload } from 'lucide-react';
-import type { NextPage } from 'next';
-import Head from 'next/head';
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import hljs from "highlight.js";
+import { Upload } from "lucide-react";
+import type { NextPage } from "next";
+import Head from "next/head";
 import axios from "axios";
 import Loader from "@/components/loader";
 import { motion } from "framer-motion";
 
 const CreateCodat: NextPage = () => {
   const [formData, setFormData] = useState<CodatFormData>({
-    title: '',
-    description: '',
-    language: '',
-    code: ''
+    title: "",
+    description: "",
+    language: "",
+    code: "",
   });
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [detectingLanguage, setDetectingLanguage] = useState(false);
   const router = useRouter();
   const params = useParams();
   const collectionId = params.collectionId;
 
-  // const languages = [
-  //   'JavaScript', 'Python', 'Java', 'C++', 'Ruby',
-  //   'Go', 'Rust', 'TypeScript', 'PHP', 'Swift'
-  // ] as const;
+  const languages = [
+    "JavaScript",
+    "Python",
+    "Java",
+    "C++",
+    "Ruby",
+    "Go",
+    "Rust",
+    "TypeScript",
+    "PHP",
+    "Swift",
+  ] as const;
+
+  const languagesDetection = (code: string) => {
+    let language = "unknown";
+    try {
+      const result = hljs.highlightAuto(code);
+      language = result.language || "unknown";
+      console.log("Detected language:", language);
+
+      const languageMap: Record<string, string> = {
+        javascript: "JavaScript",
+        typescript: "TypeScript",
+        python: "Python",
+        java: "Java",
+        cpp: "C++",
+        ruby: "Ruby",
+        go: "Go",
+        rust: "Rust",
+        php: "PHP",
+        swift: "Swift",
+      };
+
+      return languageMap[language] || language;
+    } catch (error) {
+      console.error("Language detection failed:", error);
+    }
+    return language;
+  };
+
+  useEffect(() => {
+    const detectLanguage = async () => {
+      if (formData.code.trim().length > 20) {
+        setDetectingLanguage(true);
+
+        setTimeout(() => {
+          const detectedLang = languagesDetection(formData.code);
+          setFormData((prev) => ({ ...prev, language: detectedLang }));
+          setDetectingLanguage(false);
+        }, 500);
+      }
+    };
+
+    detectLanguage();
+  }, [formData.code]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -46,9 +99,9 @@ const CreateCodat: NextPage = () => {
     if (file) {
       try {
         const text = await file.text();
-        setFormData(prev => ({ ...prev, code: text }));
+        setFormData((prev) => ({ ...prev, code: text }));
       } catch (error) {
-        console.error('Error reading file:', error);
+        console.error("Error reading file:", error);
       }
     }
   };
@@ -57,33 +110,37 @@ const CreateCodat: NextPage = () => {
     e.preventDefault();
     if (!collectionId || !formData.code || !formData.title) return;
     try {
-      setLoading(true)
+      setLoading(true);
       const res = await axios.post("/api/codat/", {
         title: formData.title,
         description: formData.description,
         code: formData.code,
-        collectionId
-      })
+        language: formData.language,
+        collectionId,
+      });
 
       if (res.status === 200) {
-        router.push(`/collections/${collectionId}`)
+        router.push(`/collections/${collectionId}`);
       }
     } catch (error) {
-      console.error('Error creating codat:', error);
+      console.error("Error creating codat:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   if (loading) {
-    return <Loader />
+    return <Loader />;
   }
 
   return (
     <>
       <Head>
         <title>Create Codat - Code Sharing Platform</title>
-        <meta name="description" content="Create and share your code snippets" />
+        <meta
+          name="description"
+          content="Create and share your code snippets"
+        />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white py-12 px-4 flex justify-center items-center">
@@ -93,11 +150,15 @@ const CreateCodat: NextPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-4xl font-extrabold mb-6 text-center">Create New Codat</h1>
+          <h1 className="text-4xl font-extrabold mb-6 text-center">
+            Create New Codat
+          </h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium mb-2">Title</label>
+              <label htmlFor="title" className="block text-sm font-medium mb-2">
+                Title
+              </label>
               <input
                 id="title"
                 name="title"
@@ -110,7 +171,12 @@ const CreateCodat: NextPage = () => {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium mb-2"
+              >
+                Description
+              </label>
               <textarea
                 id="description"
                 name="description"
@@ -121,8 +187,18 @@ const CreateCodat: NextPage = () => {
               />
             </div>
 
-            {/* <div>
-              <label htmlFor="language" className="block text-sm font-medium mb-2">Language</label>
+            <div>
+              <label
+                htmlFor="language"
+                className="flex items-center space-x-2 text-sm font-medium mb-2"
+              >
+                <span>Language</span>
+                {detectingLanguage && (
+                  <span className="text-xs text-blue-400 animate-pulse">
+                    Detecting language...
+                  </span>
+                )}
+              </label>
               <select
                 id="language"
                 name="language"
@@ -133,14 +209,18 @@ const CreateCodat: NextPage = () => {
               >
                 <option value="">Select Language</option>
                 {languages.map((lang) => (
-                  <option key={lang} value={lang}>{lang}</option>
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
                 ))}
               </select>
-            </div> */}
+            </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor="code" className="block text-sm font-medium">Code</label>
+                <label htmlFor="code" className="block text-sm font-medium">
+                  Code
+                </label>
                 <label className="flex items-center space-x-2 cursor-pointer px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition">
                   <Upload size={16} />
                   <span>Upload File</span>
