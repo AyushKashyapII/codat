@@ -9,6 +9,8 @@ interface Codat {
   codatIsPublic: boolean;
   codatAIDesc: string;
   codatAIFunc: string;
+  codatTags:string[];
+  codatLikes: number;
   createdAt: Date;
   updatedAt: Date;
   codatAuthor: {
