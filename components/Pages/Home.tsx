@@ -52,7 +52,15 @@ interface Codat {
   createdAt: string;
   updatedAt: string;
 }
+const TAG_STORAGE_KEY = "visitedTags";
+const cleanUpExpiredTags = () => {
+  const storedData = JSON.parse(localStorage.getItem(TAG_STORAGE_KEY) || "{}");
+  const now = Date.now();
 
+  if (!storedData.tags || storedData.expiresAt < now) {
+    localStorage.removeItem(TAG_STORAGE_KEY);
+  }
+};
 export default function HomePage() {
   const [typedText, setTypedText] = useState("");
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
@@ -138,6 +146,7 @@ export default function HomePage() {
     }
 
     fetchCollections();
+    cleanUpExpiredTags();
   }, []);
 
   useEffect(() => {
@@ -456,6 +465,7 @@ even_squares = [x**2 for x in range(10) if x % 2 == 0]`,
             <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-10 auto-rows-auto grid-flow-dense">
               {flattenedCodats.length > 0 ? (
                 flattenedCodats.map((codat, index) => {
+                  //@ts-ignore
                   const sizeClass = sizeClasses[getSizeClass(index)];
                   return (
                     <div
@@ -499,6 +509,7 @@ even_squares = [x**2 for x in range(10) if x % 2 == 0]`,
                             <p className="text-gray-300 text-sm">
                               by{" "}
                               {typeof codat.codatAuthor === "object"
+                              //@ts-ignore
                                 ? codat?.codatAuthor?.name || "Unknown"
                                 : codat.codatAuthor || "Unknown Author"}
                             </p>

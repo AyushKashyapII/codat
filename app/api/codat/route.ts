@@ -57,7 +57,7 @@ export async function POST(req: Request) {
       codatAIDesc: aiDescritpion,
       codatAIFunc: aiFunction,
       codatTags: aiTagsResult,
-      codatIsPublic: false,
+      codatIsPublic: true,
       codatsCollectionPartOf: {
         connect: {
           collectionId: collectionId
