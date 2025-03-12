@@ -10,6 +10,25 @@ import { createHighlighter } from "shiki";
 import Loader from "@/components/loader";
 import { ArrowLeft, Code, FileText } from "lucide-react";
 
+const TAG_STORAGE_KEY = "visitedTags";
+const EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000;
+
+const saveTagsToLocalStorage = (tags: string[]) => {
+  const storedData = JSON.parse(localStorage.getItem(TAG_STORAGE_KEY) || "{}");
+  let storedTags = storedData?.tags || [];
+
+  if (!storedTags.length) {
+    storedTags = tags;
+  } else {
+    storedTags = Array.from(new Set([...storedTags, ...tags])).slice(-15);
+  }
+
+  const expiresAt = Date.now() + EXPIRY_TIME;
+
+  const dataToStore = { tags: storedTags, timestamp: Date.now(), expiresAt };
+  localStorage.setItem(TAG_STORAGE_KEY, JSON.stringify(dataToStore));
+};
+
 const useHighlightedCode = (code: string, language: string) => {
   const [highlightedCode, setHighlightedCode] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +99,11 @@ const CodatPage = () => {
         const res = await axios.get(`/api/codat/${codatId}`);
         if (res.status === 200) {
           setCodat(res.data);
+          console.log(res.data.codatTags);
+
+          if (res.data.codatTags.length) {
+            saveTagsToLocalStorage(res.data.codatTags);
+          }
         } else {
           router.push("/");
         }

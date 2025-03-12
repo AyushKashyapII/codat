@@ -53,7 +53,15 @@ interface Codat {
   createdAt: string;
   updatedAt: string;
 }
+const TAG_STORAGE_KEY = "visitedTags";
+const cleanUpExpiredTags = () => {
+  const storedData = JSON.parse(localStorage.getItem(TAG_STORAGE_KEY) || "{}");
+  const now = Date.now();
 
+  if (!storedData.tags || storedData.expiresAt < now) {
+    localStorage.removeItem(TAG_STORAGE_KEY);
+  }
+};
 export default function HomePage() {
   const [typedText, setTypedText] = useState("");
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
@@ -140,6 +148,7 @@ export default function HomePage() {
     }
 
     fetchCollections();
+    cleanUpExpiredTags();
   }, []);
 
   useEffect(() => {

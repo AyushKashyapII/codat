@@ -3,7 +3,6 @@
 import {NextRequest, NextResponse} from "next/server";
 import {db} from "@/lib/db";
 import {currentProfile} from "@/lib/current-profile";
-import { stringify } from "querystring";
 
 export async function GET() {
   try {
@@ -33,7 +32,7 @@ export async function GET() {
       }
     })
 
-    console.log(collections);
+    console.log("he");
     return NextResponse.json(collections, {status: 200});
   } catch (e) {
     return NextResponse.json(
@@ -88,8 +87,7 @@ export async function POST(req: NextRequest) {
       }
     })
 
-    console.log("created",collection)
-
+    console.log("created",collection)    
     return NextResponse.json(collection, { status: 200 })
   } catch (e) {
     return NextResponse.json(
