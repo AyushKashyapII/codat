@@ -14,6 +14,7 @@ interface Collection {
   collectionId: string;
   collectionName: string;
   collectionDesc: string;
+  collectionColor?: string; // Add color field
   _count: {
     collectionCodats: number;
   };
@@ -22,7 +23,7 @@ interface Codat {
   codatId: string;
   codatName: string;
   codatDescription: string;
-  codatAuthor: string;
+  codatAuthor: { name: string } | string;
   authorId: string;
   codatCode: string;
   codatLanguage: string;
@@ -38,31 +39,82 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
-import { ArrowRight, Code, Folder, UserPlus, Users } from "lucide-react";
+import { ArrowRight, Code, Folder, UserPlus, Users, Pencil, X, Check } from "lucide-react";
 import SkeletonLoader from "@/components/Skeletonloader";
 
 export default function ProfilePage() {
   const { profile, setProfile } = useModel();
   const { username } = useParams() as { username: string };
-  //const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [flattenedCodats, setFlattenedCodats] = useState<Codat[]>([]);
-  const sizePattern = ["small", "medium", "large", "medium", "small", "large"];
+  const [loading, setLoading] = useState(false);
+  const sizePattern: Array<"small" | "medium" | "large"> = ["small", "medium", "large", "medium", "small", "large"];
   const router = useRouter();
   const sizeClasses = {
     small: "col-span-1 row-span-1",
     medium: "col-span-1 row-span-2",
     large: "col-span-2 row-span-2",
   };
+  
+  // State for editing collections
+  const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editedName, setEditedName] = useState("");
+  const [editedColor, setEditedColor] = useState("#3E95FF");
+  const [collections, setCollections] = useState<Collection[]>([]);
 
-  const getSizeClass = (index: number): string => {
+  // Available color options
+  const colorOptions = [
+    { name: "Blue", value: "#3E95FF" },
+    { name: "Red", value: "#FF5252" },
+    { name: "Green", value: "#4CAF50" },
+    { name: "Purple", value: "#9C27B0" },
+    { name: "Orange", value: "#FF9800" },
+    { name: "Teal", value: "#009688" },
+    { name: "Pink", value: "#E91E63" },
+    { name: "Indigo", value: "#3F51B5" }
+  ];
+
+  const getSizeClass = (index: number): keyof typeof sizeClasses => {
     const patternIndex = index % sizePattern.length;
     return sizePattern[patternIndex];
   };
 
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Start editing a collection
+  const startEditing = (collection: Collection) => {
+    setEditingCollection(collection.collectionId);
+    setEditedName(collection.collectionName);
+    setEditedColor(collection.collectionColor || "#3E95FF");
+  };
+
+  // Save collection edit
+  const saveCollectionEdit = async (collectionId: string) => {
+    try {
+      const response = await axios.patch(`/api/collections/editColor/${collectionId}`, {
+        collectionName: editedName,
+        collectionColor: editedColor
+      });
+      
+      if (response.status === 200) {
+        // Update the collections state with the edited collection
+        setCollections(collections.map(collection => 
+          collection.collectionId === collectionId 
+            ? { ...collection, collectionName: editedName, collectionColor: editedColor } 
+            : collection
+        ));
+        
+        // Reset editing state
+        setEditingCollection(null);
+      }
+    } catch (error) {
+      console.error("Error updating collection:", error);
+    }
+  };
+  
+  // Cancel editing
+  const cancelEditing = () => {
+    setEditingCollection(null);
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -161,6 +213,18 @@ export default function ProfilePage() {
     };
 
     return colors[language] || "bg-gray-900/30";
+  };
+
+  // Get collection color for the codat cards
+  const getCollectionColor = (collectionId: string | null): string => {
+    if (!collectionId) return "bg-gray-900/30";
+    
+    const collection = collections.find(c => c.collectionId === collectionId);
+    if (collection?.collectionColor) {
+      return `bg-[${collection.collectionColor}]/30`;
+    }
+    
+    return "bg-gray-900/30";
   };
 
   useEffect(() => {
@@ -298,18 +362,73 @@ export default function ProfilePage() {
                 <div className="overflow-y-auto scrollbar-hide flex-grow mt-2">
                   {collections.map((collection) => (
                     <div
-                      key={collection.collectionName}
-                      className="flex items-center justify-between p-3 rounded-md hover:bg-gray-800/50 transition cursor-pointer"
-                      onClick={() => {
-                        router.push(`/collections/${collection.collectionId}`);
-                      }}
+                      key={collection.collectionId}
+                      className="flex items-center justify-between p-3 rounded-md hover:bg-gray-800/50 transition"
                     >
-                      <span className="font-medium">
-                        {collection.collectionName}
-                      </span>
-                      <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded-full">
-                        {collection._count.collectionCodats}
-                      </span>
+                      {editingCollection === collection.collectionId ? (
+                        // Editing mode
+                        <div className="flex flex-col w-full">
+                          <div className="flex items-center w-full mb-2">
+                            <input
+                              type="text"
+                              value={editedName}
+                              onChange={(e) => setEditedName(e.target.value)}
+                              className="bg-gray-800 text-white px-2 py-1 rounded flex-grow mr-2"
+                              autoFocus
+                            />
+                            <div className="flex">
+                              <button
+                                onClick={() => saveCollectionEdit(collection.collectionId)}
+                                className="p-1 bg-green-800/50 hover:bg-green-700 rounded mr-1"
+                              >
+                                <Check size={16} />
+                              </button>
+                              <button
+                                onClick={cancelEditing}
+                                className="p-1 bg-red-800/50 hover:bg-red-700 rounded"
+                              >
+                                <X size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {colorOptions.map((color) => (
+                              <div
+                                key={color.value}
+                                className={`w-6 h-6 rounded-full cursor-pointer ${editedColor === color.value ? 'ring-2 ring-white' : ''}`}
+                                style={{ backgroundColor: color.value }}
+                                onClick={() => setEditedColor(color.value)}
+                                title={color.name}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        // Normal display mode
+                        <>
+                          <div className="flex items-center cursor-pointer" onClick={() => router.push(`/collections/${collection.collectionId}`)}>
+                            <div 
+                              className="w-4 h-4 rounded-full mr-2" 
+                              style={{ backgroundColor: collection.collectionColor || "#3E95FF" }} 
+                            />
+                            <span className="font-medium">{collection.collectionName}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded-full mr-2">
+                              {collection._count.collectionCodats}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                startEditing(collection);
+                              }}
+                              className="p-1 hover:bg-gray-700 rounded"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -361,70 +480,81 @@ export default function ProfilePage() {
                   {flattenedCodats.length > 0 ? (
                     flattenedCodats.map((codat, index) => {
                       const sizeClass = sizeClasses[getSizeClass(index)];
+                      // Find the collection for this codat to get its color
+                      const collection = collections.find(c => c.collectionId === codat.collectionId);
+                      // Use collection color for background if available, otherwise use language color
+                      const backgroundColor = collection?.collectionColor 
+                        ? { backgroundColor: `${collection.collectionColor}30` } // opacity 30%
+                        : {};
+                      
                       return (
                         <div
-                          key={codat.codatId || "index-${codat.codatId}"}
-                          className={`${sizeClass} ${getLanguageColor(
-                            codat.codatLanguage
-                          )} rounded-lg p-6 relative overflow-hidden group cursor-pointer`}
+                          key={codat.codatId || `index-${index}`}
+                          className={`${sizeClass} rounded-lg p-6 relative overflow-hidden group cursor-pointer`}
+                          style={backgroundColor}
                           onClick={() => router.push(`/codat/${codat.codatId}`)}
                         >
-                          {/* Language Icon */}
-                          <div className="absolute top-0 right-0 p-4">
-                            <Code
-                              className="text-white/30 group-hover:text-white/50 transition-all"
-                              size={32}
-                            />
-                          </div>
-
-                          <div className="flex flex-col h-full justify-between">
-                            <div>
-                              <div className="flex justify-between items-center mb-2">
-                                <h4 className="text-gray-300 text-sm">
-                                  {codat.codatLanguage}
-                                </h4>
-                              </div>
-                              <h3 className="text-xl font-bold mb-2">
-                                {codat.codatName}
-                              </h3>
-
-                              {/* Code snippet preview */}
-                              <div className="bg-black/30 rounded p-3 my-3 overflow-hidden max-h-32 font-mono text-sm text-gray-200">
-                                <pre className="line-clamp-5">
-                                  {codat.codatCode?.length > 150
-                                    ? codat.codatCode.substring(0, 150) + "..."
-                                    : codat.codatCode || "No Code Available"}
-                                </pre>
-                              </div>
-
-                              {/* Author info */}
-                              <div className="flex items-center mt-2">
-                                <Users
-                                  size={16}
-                                  className="mr-1 text-gray-400"
-                                />
-                                <p className="text-gray-300 text-sm">
-                                  by{" "}
-                                  {typeof codat.codatAuthor === "object"
-                                    ? codat?.codatAuthor?.name || "Unknown"
-                                    : codat.codatAuthor || "Unknown Author"}
-                                </p>
-                              </div>
+                          {!collection?.collectionColor && (
+                            <div className={`absolute inset-0 ${getLanguageColor(codat.codatLanguage)}`}></div>
+                          )}
+                          <div className="relative z-10">
+                            {/* Language Icon */}
+                            <div className="absolute top-0 right-0 p-4">
+                              <Code
+                                className="text-white/30 group-hover:text-white/50 transition-all"
+                                size={32}
+                              />
                             </div>
 
-                            {/* Description that appears on hover */}
-                            <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <p className="text-white/70 mb-3">
-                                {codat.codatDescription?.length > 250
-                                  ? codat.codatDescription.substring(0, 250) +
-                                    "..."
-                                  : codat.codatDescription ||
-                                    "No Description Available"}
-                              </p>
-                              <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-md text-sm flex items-center">
-                                Explore{" "}
-                                <ArrowRight size={16} className="ml-1" />
-                              </button>
+                            <div className="flex flex-col h-full justify-between">
+                              <div>
+                                <div className="flex justify-between items-center mb-2">
+                                  <h4 className="text-gray-300 text-sm">
+                                    {codat.codatLanguage}
+                                  </h4>
+                                </div>
+                                <h3 className="text-xl font-bold mb-2">
+                                  {codat.codatName}
+                                </h3>
+
+                                {/* Code snippet preview */}
+                                <div className="bg-black/30 rounded p-3 my-3 overflow-hidden max-h-32 font-mono text-sm text-gray-200">
+                                  <pre className="line-clamp-5">
+                                    {codat.codatCode?.length > 150
+                                      ? codat.codatCode.substring(0, 150) + "..."
+                                      : codat.codatCode || "No Code Available"}
+                                  </pre>
+                                </div>
+
+                                {/* Author info */}
+                                <div className="flex items-center mt-2">
+                                  <Users
+                                    size={16}
+                                    className="mr-1 text-gray-400"
+                                  />
+                                  <p className="text-gray-300 text-sm">
+                                    by{" "}
+                                    {typeof codat.codatAuthor === "object"
+                                      ? codat.codatAuthor.name 
+                                      : codat.codatAuthor || "Unknown Author"}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Description that appears on hover */}
+                              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <p className="text-white/70 mb-3">
+                                  {codat.codatDescription?.length > 250
+                                    ? codat.codatDescription.substring(0, 250) +
+                                      "..."
+                                    : codat.codatDescription ||
+                                      "No Description Available"}
+                                </p>
+                                <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-md text-sm flex items-center">
+                                  Explore{" "}
+                                  <ArrowRight size={16} className="ml-1" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
