@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import { useModel } from "@/hooks/user-model-store";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -22,8 +23,11 @@ export default function EditProfile({
   const [name, setName] = useState(initialName || "");
   const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || "");
   const [image, setImage] = useState(initialImage || "");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleUpdateProfile = async () => {
+    setLoading(true);
     try {
       const { data } = await axios.put("/api/profile/edit", {
         name,
@@ -32,15 +36,18 @@ export default function EditProfile({
       });
 
       setEditProfile(data);
+      //setLoading(false);
       toast.success("Profile updated successfully!");
     } catch (error) {
       toast.error("Error updating profile");
       console.error("Update error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md border border-gray-300">
       <h1 className="text-2xl font-bold mb-4">Edit Profile</h1>
 
       {/* Email (Read-only) */}
@@ -77,18 +84,26 @@ export default function EditProfile({
 
       <div className="mb-4">
         <label className="block font-medium">Profile Image:</label>
-        <img src={image}/>
+        <img src={image} />
       </div>
 
-      
+      <div className="flex w-[100%] justify-between">
+        <button
+          onClick={handleUpdateProfile}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-[40%]"
+        >
+          {loading ? <p>Saving...</p> : <p>Save Changes</p>}
+        </button>
 
-      {/* Save Button */}
-      <button
-        onClick={handleUpdateProfile}
-        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Save Changes
-      </button>
+        <button
+          onClick={() => {
+            router.push(`/profile/${name}`);
+          }}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-[40%]"
+        >
+          Go Back
+        </button>
+      </div>
     </div>
   );
 }

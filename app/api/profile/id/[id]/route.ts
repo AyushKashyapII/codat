@@ -29,6 +29,11 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
               following: true,
             },
           },
+          usersFollowing:{
+            include:{
+              follower:true,
+            }
+          }
         },
       });
       

@@ -46,6 +46,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{id: 
       return NextResponse.json({ error: "failed to follow user" }, { status: 500 })
     }
 
+    console.log("follow succesful ...")
+
     return NextResponse.json({ status: 200 });
   } catch (e) {
     return NextResponse.json(

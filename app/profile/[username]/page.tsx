@@ -39,7 +39,16 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
-import { ArrowRight, Code, Folder, UserPlus, Users, Pencil, X, Check } from "lucide-react";
+import {
+  ArrowRight,
+  Code,
+  Folder,
+  UserPlus,
+  Users,
+  Pencil,
+  X,
+  Check,
+} from "lucide-react";
 import SkeletonLoader from "@/components/Skeletonloader";
 import { createHighlighter } from "shiki";
 
@@ -99,18 +108,29 @@ export default function ProfilePage() {
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [flattenedCodats, setFlattenedCodats] = useState<Codat[]>([]);
   const [loading, setLoading] = useState(false);
-  const sizePattern: Array<"small" | "medium" | "large"> = ["small", "medium", "large", "medium", "small", "large"];
+  const sizePattern: Array<"small" | "medium" | "large"> = [
+    "small",
+    "medium",
+    "large",
+    "medium",
+    "small",
+    "large",
+  ];
   const router = useRouter();
   const sizeClasses = {
     small: "col-span-1 row-span-1",
     medium: "col-span-1 row-span-2",
     large: "col-span-2 row-span-2",
   };
-  
+
   // State for editing collections
-  const [editingCollection, setEditingCollection] = useState<string | null>(null);
+  const [editingCollection, setEditingCollection] = useState<string | null>(
+    null
+  );
   const [editedName, setEditedName] = useState("");
   const [editedColor, setEditedColor] = useState("#3E95FF");
+  const [followers, setFollowers] = useState();
+  const [following, setFollowing] = useState();
   const [collections, setCollections] = useState<Collection[]>([]);
 
   // Available color options
@@ -122,7 +142,7 @@ export default function ProfilePage() {
     { name: "Orange", value: "#FF9800" },
     { name: "Teal", value: "#009688" },
     { name: "Pink", value: "#E91E63" },
-    { name: "Indigo", value: "#3F51B5" }
+    { name: "Indigo", value: "#3F51B5" },
   ];
 
   const getSizeClass = (index: number): keyof typeof sizeClasses => {
@@ -140,19 +160,28 @@ export default function ProfilePage() {
   // Save collection edit
   const saveCollectionEdit = async (collectionId: string) => {
     try {
-      const response = await axios.patch(`/api/collections/editColor/${collectionId}`, {
-        collectionName: editedName,
-        collectionColor: editedColor
-      });
-      
+      const response = await axios.patch(
+        `/api/collections/editColor/${collectionId}`,
+        {
+          collectionName: editedName,
+          collectionColor: editedColor,
+        }
+      );
+
       if (response.status === 200) {
         // Update the collections state with the edited collection
-        setCollections(collections.map(collection => 
-          collection.collectionId === collectionId 
-            ? { ...collection, collectionName: editedName, collectionColor: editedColor } 
-            : collection
-        ));
-        
+        setCollections(
+          collections.map((collection) =>
+            collection.collectionId === collectionId
+              ? {
+                  ...collection,
+                  collectionName: editedName,
+                  collectionColor: editedColor,
+                }
+              : collection
+          )
+        );
+
         // Reset editing state
         setEditingCollection(null);
       }
@@ -160,7 +189,7 @@ export default function ProfilePage() {
       console.error("Error updating collection:", error);
     }
   };
-  
+
   // Cancel editing
   const cancelEditing = () => {
     setEditingCollection(null);
@@ -226,6 +255,27 @@ export default function ProfilePage() {
     fetchCollections();
   }, []);
 
+  useEffect(() => {
+    const fetchFollow = async () => {
+      try {
+        const followingData = await axios.get(`/api/followings`);
+        // const followings = followingData.data;
+        setFollowing(followingData.data);
+
+        //const totalFollowing = followingData.data.length;
+
+        const followersData = await axios.get(`/api/followers`);
+        //const followers = followersData.data;
+        setFollowers(followersData.data);
+        //const totalFollowers = followersData.data.length;
+      } catch (error) {
+        console.log("error in fetching following /followers", error);
+      }
+    };
+
+    fetchFollow();
+  }, []);
+
   const teams = [
     { name: "Algorithm Enthusiasts", members: 8 },
     { name: "CP Warriors", members: 6 },
@@ -268,12 +318,12 @@ export default function ProfilePage() {
   // Get collection color for the codat cards
   const getCollectionColor = (collectionId: string | null): string => {
     if (!collectionId) return "bg-gray-900/30";
-    
-    const collection = collections.find(c => c.collectionId === collectionId);
+
+    const collection = collections.find((c) => c.collectionId === collectionId);
     if (collection?.collectionColor) {
       return `bg-[${collection.collectionColor}]/30`;
     }
-    
+
     return "bg-gray-900/30";
   };
 
@@ -323,7 +373,12 @@ export default function ProfilePage() {
         <div className="bg-[#1A2035] rounded-lg p-6 shadow-lg mb-6 w-full">
           <div className="flex justify-between items-center">
             {/* Left side - Profile info */}
-            <div className="flex items-center gap-6">
+            <div
+              className="flex items-center gap-6 relative group cursor-pointer"
+              onClick={() => {
+                router.push(`/profile/edit`);
+              }}
+            >
               {profile.image && (
                 <img
                   src={profile.image}
@@ -334,6 +389,9 @@ export default function ProfilePage() {
               <div>
                 <h1 className="text-3xl font-bold">{profile.name}</h1>
                 <p className="text-[#B8C0D2]">{profile.email}</p>
+                <div className="absolute hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded mt-1 whitespace-nowrap">
+                  Click to edit profile
+                </div>
               </div>
             </div>
 
@@ -342,11 +400,15 @@ export default function ProfilePage() {
               <div className="grid grid-cols-2 gap-4 text-center">
                 <div className="border-r border-gray-700 pr-4">
                   <h3 className="text-[#3E95FF] font-medium">Following</h3>
-                  <p className="text-xl font-bold">0</p>
+                  <p className="text-xl font-bold">
+                    {following ? following.length : 0}
+                  </p>
                 </div>
                 <div>
                   <h3 className="text-[#3E95FF] font-medium">Followers</h3>
-                  <p className="text-xl font-bold">0</p>
+                  <p className="text-xl font-bold">
+                    {followers ? followers.length : 0}
+                  </p>
                 </div>
               </div>
             </div>
@@ -428,7 +490,9 @@ export default function ProfilePage() {
                             />
                             <div className="flex">
                               <button
-                                onClick={() => saveCollectionEdit(collection.collectionId)}
+                                onClick={() =>
+                                  saveCollectionEdit(collection.collectionId)
+                                }
                                 className="p-1 bg-green-800/50 hover:bg-green-700 rounded mr-1"
                               >
                                 <Check size={16} />
@@ -445,7 +509,11 @@ export default function ProfilePage() {
                             {colorOptions.map((color) => (
                               <div
                                 key={color.value}
-                                className={`w-6 h-6 rounded-full cursor-pointer ${editedColor === color.value ? 'ring-2 ring-white' : ''}`}
+                                className={`w-6 h-6 rounded-full cursor-pointer ${
+                                  editedColor === color.value
+                                    ? "ring-2 ring-white"
+                                    : ""
+                                }`}
                                 style={{ backgroundColor: color.value }}
                                 onClick={() => setEditedColor(color.value)}
                                 title={color.name}
@@ -456,12 +524,24 @@ export default function ProfilePage() {
                       ) : (
                         // Normal display mode
                         <>
-                          <div className="flex items-center cursor-pointer" onClick={() => router.push(`/collections/${collection.collectionId}`)}>
-                            <div 
-                              className="w-4 h-4 rounded-full mr-2" 
-                              style={{ backgroundColor: collection.collectionColor || "#3E95FF" }} 
+                          <div
+                            className="flex items-center cursor-pointer"
+                            onClick={() =>
+                              router.push(
+                                `/collections/${collection.collectionId}`
+                              )
+                            }
+                          >
+                            <div
+                              className="w-4 h-4 rounded-full mr-2"
+                              style={{
+                                backgroundColor:
+                                  collection.collectionColor || "#3E95FF",
+                              }}
                             />
-                            <span className="font-medium">{collection.collectionName}</span>
+                            <span className="font-medium">
+                              {collection.collectionName}
+                            </span>
                           </div>
                           <div className="flex items-center">
                             <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded-full mr-2">
@@ -520,7 +600,7 @@ export default function ProfilePage() {
             {/* Right Section (70%) - Cards */}
             <div className="lg:w-9/12 h-[90vh] flex flex-col">
               <h2 className="sticky top-0 text-2xl font-bold mb-6 z-10 bg-[#your-background-color]">
-                My Codats
+                My Codats - ({flattenedCodats.length})
               </h2>
               <div className="overflow-y-auto scrollbar-hide flex-1">
                 <div
@@ -531,12 +611,14 @@ export default function ProfilePage() {
                     flattenedCodats.map((codat, index) => {
                       const sizeClass = sizeClasses[getSizeClass(index)];
                       // Find the collection for this codat to get its color
-                      const collection = collections.find(c => c.collectionId === codat.collectionId);
+                      const collection = collections.find(
+                        (c) => c.collectionId === codat.collectionId
+                      );
                       // Use collection color for background if available, otherwise use language color
-                      const backgroundColor = collection?.collectionColor 
+                      const backgroundColor = collection?.collectionColor
                         ? { backgroundColor: `${collection.collectionColor}30` } // opacity 30%
                         : {};
-                      
+
                       return (
                         <div
                           key={codat.codatId || `index-${index}`}
@@ -545,7 +627,11 @@ export default function ProfilePage() {
                           onClick={() => router.push(`/codat/${codat.codatId}`)}
                         >
                           {!collection?.collectionColor && (
-                            <div className={`absolute inset-0 ${getLanguageColor(codat.codatLanguage)}`}></div>
+                            <div
+                              className={`absolute inset-0 ${getLanguageColor(
+                                codat.codatLanguage
+                              )}`}
+                            ></div>
                           )}
                           <div className="relative z-10">
                             {/* Language Icon */}
@@ -572,7 +658,8 @@ export default function ProfilePage() {
                                   <CodeBlock
                                     code={
                                       codat.codatCode?.length > 150
-                                        ? codat.codatCode.substring(0, 150) + "..."
+                                        ? codat.codatCode.substring(0, 250) +
+                                          "..."
                                         : codat.codatCode || "No Code Available"
                                     }
                                     language={codat.codatLanguage}
@@ -588,7 +675,7 @@ export default function ProfilePage() {
                                   <p className="text-gray-300 text-sm">
                                     by{" "}
                                     {typeof codat.codatAuthor === "object"
-                                      ? codat.codatAuthor.name 
+                                      ? codat.codatAuthor.name
                                       : codat.codatAuthor || "Unknown Author"}
                                   </p>
                                 </div>

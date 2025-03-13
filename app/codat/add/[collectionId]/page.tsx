@@ -9,11 +9,15 @@ export interface CodatFormData {
   code: string;
 }
 
-import { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import hljs from "highlight.js";
-import { Upload } from "lucide-react";
+
+
 import type { NextPage } from "next";
-import Head from "next/head";
+
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import hljs from 'highlight.js';
+import { Upload } from 'lucide-react';
+
+import Head from 'next/head';
 import axios from "axios";
 import Loader from "@/components/loader";
 import { motion } from "framer-motion";
@@ -44,46 +48,93 @@ const CreateCodat: NextPage = () => {
     "Swift",
   ] as const;
 
+  // const languagesDetection = (code: string) => {
+  //   let language = "unknown";
+  //   try {
+  //     const result = hljs.highlightAuto(code);
+  //     language = result.language || "unknown";
+  //     console.log("Detected language:", language);
+
+  //     const languageMap: Record<string, string> = {
+  //       javascript: "JavaScript",
+  //       typescript: "TypeScript",
+  //       python: "Python",
+  //       java: "Java",
+  //       cpp: "C++",
+  //       ruby: "Ruby",
+  //       go: "Go",
+  //       rust: "Rust",
+  //       php: "PHP",
+  //       swift: "Swift",
+  //     };
+
+  //     return languageMap[language] || language;
+  //   } catch (error) {
+  //     console.error("Language detection failed:", error);
+  //   }
+  //   return language;
+  // };
+
+  // useEffect(() => {
+  //   const detectLanguage = async () => {
+  //     if (formData.code.trim().length > 20) {
+  //       setDetectingLanguage(true);
+
+  //       setTimeout(() => {
+  //         const detectedLang = languagesDetection(formData.code);
+  //         setFormData((prev) => ({ ...prev, language: detectedLang }));
+  //         setDetectingLanguage(false);
+  //       }, 500);
+  //     }
+  //   };
+
+  //   detectLanguage();
+  // }, [formData.code]);
+  // const languages = [
+  //   'JavaScript', 'Python', 'Java', 'C++', 'Ruby',
+  //   'Go', 'Rust', 'TypeScript', 'PHP', 'Swift'
+  // ] as const;
+
   const languagesDetection = (code: string) => {
     let language = "unknown";
     try {
       const result = hljs.highlightAuto(code);
       language = result.language || "unknown";
       console.log("Detected language:", language);
-
+      
       const languageMap: Record<string, string> = {
-        javascript: "JavaScript",
-        typescript: "TypeScript",
-        python: "Python",
-        java: "Java",
-        cpp: "C++",
-        ruby: "Ruby",
-        go: "Go",
-        rust: "Rust",
-        php: "PHP",
-        swift: "Swift",
+        'javascript': 'JavaScript',
+        'typescript': 'TypeScript',
+        'python': 'Python',
+        'java': 'Java',
+        'cpp': 'C++',
+        'ruby': 'Ruby',
+        'go': 'Go',
+        'rust': 'Rust',
+        'php': 'PHP',
+        'swift': 'Swift'
       };
-
+      
       return languageMap[language] || language;
     } catch (error) {
       console.error("Language detection failed:", error);
     }
     return language;
-  };
+  }
 
   useEffect(() => {
     const detectLanguage = async () => {
-      if (formData.code.trim().length > 20) {
+      if (formData.code.trim().length > 20) { 
         setDetectingLanguage(true);
-
+        
         setTimeout(() => {
           const detectedLang = languagesDetection(formData.code);
-          setFormData((prev) => ({ ...prev, language: detectedLang }));
+          setFormData(prev => ({ ...prev, language: detectedLang }));
           setDetectingLanguage(false);
-        }, 500);
+        }, 500); 
       }
     };
-
+    
     detectLanguage();
   }, [formData.code]);
 
@@ -118,6 +169,7 @@ const CreateCodat: NextPage = () => {
         language: formData.language,
         collectionId,
       });
+      
 
       if (res.status === 200) {
         router.push(`/collections/${collectionId}`);
@@ -192,6 +244,15 @@ const CreateCodat: NextPage = () => {
                 htmlFor="language"
                 className="flex items-center space-x-2 text-sm font-medium mb-2"
               >
+                <span>Language</span>
+                {detectingLanguage && (
+                  <span className="text-xs text-blue-400 animate-pulse">
+                    Detecting language...
+                  </span>
+                )}
+              </label>
+            <div>
+              <label htmlFor="language" className="flex items-center space-x-2 text-sm font-medium mb-2">
                 <span>Language</span>
                 {detectingLanguage && (
                   <span className="text-xs text-blue-400 animate-pulse">

@@ -1,7 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Code, Folder, UserPlus, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Code,
+  Folder,
+  UserCheck,
+  UserPlus,
+  Users,
+} from "lucide-react";
 import SkeletonLoader from "@/components/Skeletonloader";
 import axios from "axios";
 import { useParams } from "next/navigation";
@@ -46,6 +53,57 @@ const ProfilePageID = () => {
   const { id } = useParams() as { id: string };
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isDisabled, setIsDisabled] = useState(false);
+
+  const handleFollow = async () => {
+    if (isDisabled) return;
+    setIsDisabled(true);
+    try {
+      const res = await axios.post(`/api/followings/${id}`);
+      console.log("follow sucessful", res);
+      setIsFollowing(true);
+    } catch (error) {
+      console.log("error during following the user", error);
+    } finally {
+      setIsDisabled(false);
+    }
+  };
+
+  useEffect(() => {
+    const checkFollowStatus = async () => {
+      try {
+        if (!id) return;
+
+        const response = await axios.get(`/api/followings`);
+        //console.log("response on load..", response);
+        const responseData = response.data;
+        const followingIds = responseData.map((item: any) => item.following.id);
+
+        if (followingIds.includes(id)) {
+          setIsFollowing(true);
+        }
+      } catch (error) {
+        console.error("Error checking follow status:", error);
+      }
+    };
+
+    checkFollowStatus();
+  }, [id]);
+
+  const handleUnfollow = async () => {
+    if (isDisabled) return;
+    setIsDisabled(true);
+
+    try {
+      const res = await axios.delete(`/api/followings/${id}`);
+      console.log("unfollow successful");
+      setIsFollowing(false);
+    } catch (error) {
+      console.log("error", error);
+    } finally {
+      setIsDisabled(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -57,7 +115,7 @@ const ProfilePageID = () => {
         if (!response.ok) throw new Error("Failed to fetch profile");
 
         const data = await response.json();
-        //console.log("Profile data:", data);
+        console.log("Profile data:", data);
         setProfileData(data);
 
         // Check if the profile contains collections
@@ -72,9 +130,8 @@ const ProfilePageID = () => {
           );
 
           const codatResponses = await Promise.all(codatPromises);
-          console.log("Codat responses for user collections:", codatResponses);
+          //console.log("Codat responses for user collections:", codatResponses);
 
-          // Process the codats the same way as before
           const codatsMap: Record<string, Codat[]> = {};
           let allUserCodats: Codat[] = [];
 
@@ -116,6 +173,8 @@ const ProfilePageID = () => {
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [flattenedCodats, setFlattenedCodats] = useState<Codat[]>([]);
   const sizePattern = ["small", "medium", "large", "medium", "small", "large"];
+
+  const [isFollowing, setIsFollowing] = useState(false);
   //const router = useRouter();
   const sizeClasses = {
     small: "col-span-1 row-span-1",
@@ -183,8 +242,8 @@ const ProfilePageID = () => {
             <div className="flex items-center gap-6">
               {profileData.image && (
                 <img
-                  src={profileData.image}
-                  alt={profileData.name as string}
+                  src={profileData?.image}
+                  alt={profileData?.name as string}
                   className="w-24 h-24 rounded-full border-2 border-[#3E95FF]"
                 />
               )}
@@ -194,17 +253,29 @@ const ProfilePageID = () => {
               </div>
             </div>
 
-            {/* Right side - Followers/Following */}
-            <div className="bg-[#141B2D] rounded-lg p-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="border-r border-gray-700 pr-4">
-                  <h3 className="text-[#3E95FF] font-medium">Following</h3>
-                  <p className="text-xl font-bold">0</p>
-                </div>
-                <div>
-                  <h3 className="text-[#3E95FF] font-medium">Followers</h3>
-                  <p className="text-xl font-bold">0</p>
-                </div>
+            <div className="bg-[#141B2D] rounded-lg p-4 cursor-pointer">
+              <div className=" text-center">
+                {isFollowing ? (
+                  <div
+                    className="border-r border-gray-700 pr-4 flex justify-around  w-[150px]"
+                    onClick={() => handleUnfollow()}
+                  >
+                    <UserCheck size={20} />
+                    <h3 className="text-[#3E95FF] font-medium text-center">
+                      Following
+                    </h3>
+                  </div>
+                ) : (
+                  <div
+                    className="border-r border-gray-700 pr-4 flex justify-around w-[150px]"
+                    onClick={() => handleFollow()}
+                  >
+                    <UserPlus size={20} />
+                    <h3 className="text-[#3E95FF] font-medium text-center">
+                      Follow
+                    </h3>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -332,7 +403,7 @@ const ProfilePageID = () => {
                               <div className="bg-black/30 rounded p-3 my-3 overflow-hidden max-h-32 font-mono text-sm text-gray-200">
                                 <pre className="line-clamp-5">
                                   {codat.codatCode?.length > 150
-                                    ? codat.codatCode.substring(0, 150) + "..."
+                                    ? codat.codatCode.substring(0, 250) + "..."
                                     : codat.codatCode || "No Code Available"}
                                 </pre>
                               </div>
