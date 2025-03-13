@@ -4,45 +4,6 @@ import {NextRequest, NextResponse} from "next/server";
 import {db} from "@/lib/db";
 import {currentProfile} from "@/lib/current-profile";
 
-export async function GET() {
-  try {
-    const profile = await currentProfile();
-    console.log(profile);
-
-    if (!profile) {
-      return NextResponse.json(
-        { error: 'User not logged in' },
-        { status: 403 }
-      )
-    }
-
-    const collections = await db.collections.findMany({
-      where: {
-        collectionOwnerId: profile.id
-      },
-      select: {
-        collectionId: true,
-        collectionName: true,
-        collectionDesc: true,
-        collectionColor:true,
-        createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: { collectionCodats: true },
-        },
-      }
-    })
-
-    console.log("he");
-    return NextResponse.json(collections, {status: 200});
-  } catch (e) {
-    return NextResponse.json(
-      { error: `Internal Server error: ${e}` },
-      { status: 500 }
-    );
-  }
-}
-
 export async function POST(req: NextRequest) {
   try {
     const profile = await currentProfile();
