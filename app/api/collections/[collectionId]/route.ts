@@ -19,6 +19,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{colle
       select: {
         collectionName: true,
         collectionDesc: true,
+        collectionColor:true,
         collectionCodats: {
           select: {
             codatName: true,
@@ -33,6 +34,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{colle
         },
       }
     })
+
+    console.log(codats,"codats")
 
     return NextResponse.json(codats, { status: 200 });
   } catch (e) {

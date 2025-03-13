@@ -12,6 +12,8 @@ import {
 import SkeletonLoader from "@/components/Skeletonloader";
 import axios from "axios";
 import { useParams } from "next/navigation";
+import ProfileLoaderSkeleton from "@/components/ProfileLoader";
+import { profile } from "console";
 
 interface CodeSnippet {
   title: string;
@@ -229,7 +231,13 @@ const ProfilePageID = () => {
     return colors[language] || "bg-gray-900/30";
   };
 
-  if (loading) return <div>Loading profile...</div>;
+  if (loading)
+    return (
+      <div className="flex flex-col bg-[#0F1220]">
+        <ProfileLoaderSkeleton />
+        <SkeletonLoader ownProfile={false} />
+      </div>
+    );
   if (!profileData) return <div>Profile not found</div>;
 
   return (

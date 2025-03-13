@@ -24,6 +24,7 @@ export async function GET() {
         collectionId: true,
         collectionName: true,
         collectionDesc: true,
+        collectionColor:true,
         createdAt: true,
         updatedAt: true,
         _count: {

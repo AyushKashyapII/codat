@@ -1,7 +1,7 @@
 import { Folder, UserPlus } from "lucide-react";
 import React from "react";
 
-const SkeletonLoader = () => {
+const SkeletonLoader = ({ ownProfile }) => {
   return (
     <div className="flex w-full min-h-screen bg-gray-900 text-white">
       {/* Left Sidebar (25% width on desktop) */}
@@ -63,7 +63,7 @@ const SkeletonLoader = () => {
         {/* Header - My Codats */}
         <div className="mb-8">
           <div className="h-10 w-48 bg-gray-800 rounded-md animate-pulse flex items-center text-bold p-2">
-            My Codats
+            {ownProfile ? "My Codats" : "Explore codats"}
           </div>
         </div>
 

@@ -51,6 +51,7 @@ import {
 } from "lucide-react";
 import SkeletonLoader from "@/components/Skeletonloader";
 import { createHighlighter } from "shiki";
+import ProfileLoaderSkeleton from "@/components/ProfileLoader";
 
 const useHighlightedCode = (code: string, language: string) => {
   const [highlightedCode, setHighlightedCode] = useState("");
@@ -161,7 +162,7 @@ export default function ProfilePage() {
   const saveCollectionEdit = async (collectionId: string) => {
     try {
       const response = await axios.patch(
-        `/api/collections/editColor/${collectionId}`,
+        `/api/collections/edit/${collectionId}`,
         {
           collectionName: editedName,
           collectionColor: editedColor,
@@ -169,7 +170,6 @@ export default function ProfilePage() {
       );
 
       if (response.status === 200) {
-        // Update the collections state with the edited collection
         setCollections(
           collections.map((collection) =>
             collection.collectionId === collectionId
@@ -315,16 +315,29 @@ export default function ProfilePage() {
     return colors[language] || "bg-gray-900/30";
   };
 
-  // Get collection color for the codat cards
-  const getCollectionColor = (collectionId: string | null): string => {
-    if (!collectionId) return "bg-gray-900/30";
+  const getCollectionColor = (
+    collectionId: string | null
+  ): React.CSSProperties => {
+    //console.log("seeingi if collection exists");
+    if (!collectionId) return { backgroundColor: "rgba(17, 24, 39, 0.3)" };
+
+    // console.log("collection exists", collectionId);
+
+    // console.log("search in collection", collections);
 
     const collection = collections.find((c) => c.collectionId === collectionId);
-    if (collection?.collectionColor) {
-      return `bg-[${collection.collectionColor}]/30`;
+    if (!collection) {
+      //console.log("no coledetcion match found ");
+      return { backgroundColor: "rgb(62, 149, 255)" };
     }
 
-    return "bg-gray-900/30";
+    if (collection.collectionColor) {
+      // console.log("foynd..", collection.collectionName);
+      // console.log("collection colour ..", collection.collectionColor);
+      return { backgroundColor: collection.collectionColor };
+    }
+
+    return { backgroundColor: "rgb(62, 149, 255)" };
   };
 
   useEffect(() => {
@@ -349,8 +362,9 @@ export default function ProfilePage() {
 
   if (loading)
     return (
-      <div className="flex items-center justify-center h-64 text-white">
-        Loading...
+      <div className="flex flex-col bg-[#0F1220]">
+        <ProfileLoaderSkeleton />
+        <SkeletonLoader ownProfile={true} />
       </div>
     );
   if (error)
@@ -534,10 +548,9 @@ export default function ProfilePage() {
                           >
                             <div
                               className="w-4 h-4 rounded-full mr-2"
-                              style={{
-                                backgroundColor:
-                                  collection.collectionColor || "#3E95FF",
-                              }}
+                              style={getCollectionColor(
+                                collection.collectionId
+                              )}
                             />
                             <span className="font-medium">
                               {collection.collectionName}

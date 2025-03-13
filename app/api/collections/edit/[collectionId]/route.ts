@@ -52,6 +52,8 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{collec
       where: { collectionId: collectionId },
       data: updateData
     });
+
+    console.log("collected updated ..success",updatedCollection)
     
     return NextResponse.json({
       message: "`Collection` updated successfully",

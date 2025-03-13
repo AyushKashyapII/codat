@@ -1,6 +1,14 @@
-"use client"
+"use client";
 
-import {useParams, useRouter} from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { Upload } from "lucide-react";
+import type { NextPage } from "next";
+import Head from "next/head";
+import axios from "axios";
+import Loader from "@/components/loader";
+import { motion } from "framer-motion";
+import { useModel } from "@/hooks/user-model-store";
 
 export interface CodatFormData {
   title: string;
@@ -9,36 +17,51 @@ export interface CodatFormData {
   code: string;
 }
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { Upload } from 'lucide-react';
-import type { NextPage } from 'next';
-import Head from 'next/head';
-import axios from "axios";
-import Loader from "@/components/loader";
-import { motion } from "framer-motion";
+interface Collection {
+  createdAt: Date;
+  updatedAt: Date;
+  collectionId: string;
+  collectionName: string;
+  collectionDesc: string;
+  collectionColor?: string;
+  _count: {
+    collectionCodats: number;
+  };
+}
 
-const CreateCodat: NextPage = () => {
+const EditCodat: NextPage = () => {
   const [formData, setFormData] = useState<CodatFormData>({
-    title: '',
-    description: '',
-    language: '',
-    code: ''
+    title: "",
+    description: "",
+    language: "",
+    code: "",
   });
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const params = useParams();
-  const collectionId = params.collectionId;
+  const codatId = params.codatId as string;
+  const collectionId = params.collectionId as string;
 
   const languages = [
-    'JavaScript', 'Python', 'Java', 'C++', 'Ruby',
-    'Go', 'Rust', 'TypeScript', 'PHP', 'Swift'
+    "JavaScript",
+    "Python",
+    "Java",
+    "C++",
+    "Ruby",
+    "Go",
+    "Rust",
+    "TypeScript",
+    "PHP",
+    "Swift",
   ] as const;
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -46,45 +69,92 @@ const CreateCodat: NextPage = () => {
     if (file) {
       try {
         const text = await file.text();
-        setFormData(prev => ({ ...prev, code: text }));
+        setFormData((prev) => ({ ...prev, code: text }));
       } catch (error) {
-        console.error('Error reading file:', error);
+        console.error("Error reading file:", error);
       }
     }
   };
 
+  // Fetch codat data when component mounts
+  useEffect(() => {
+    async function fetchCodatData() {
+      if (!codatId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await axios.get(`/api/codat/${codatId}`);
+
+        if (response.status === 200 && response.data) {
+          console.log(response.data, "response.data");
+          setFormData({
+            title: response.data.codatName || "",
+            description: response.data.codatDescription || "",
+            language: response.data.codatLanguage || "",
+            code: response.data.codatCode || "",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching codat data:", error);
+        setError("Failed to fetch codat data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCodatData();
+  }, [codatId]);
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!collectionId || !formData.code || !formData.language || !formData.title) return;
+    if (!codatId || !formData.code || !formData.language || !formData.title) {
+      setError("Please fill all required fields");
+      return;
+    }
+
     try {
-      setLoading(true)
-      const res = await axios.post("/api/codat/create", {
+      setSubmitting(true);
+      setError(null);
+
+      const response = await axios.patch(`/api/codat/${codatId}`, {
         title: formData.title,
         description: formData.description,
         code: formData.code,
         language: formData.language,
-        collectionId
-      })
+      });
 
-      if (res.status === 200) {
-        router.push(`/collections/${collectionId}`)
+      if (response.status === 200) {
+        if (collectionId) {
+          router.push(`/collections/${collectionId}`);
+        } else {
+          router.push(`/codat/${codatId}`);
+        }
       }
-    } catch (error) {
-      console.error('Error creating codat:', error);
+    } catch (error: any) {
+      console.error("Error updating codat:", error);
+      setError(
+        error.response?.data?.error ||
+          "Failed to update codat. Please try again."
+      );
     } finally {
-      setLoading(false)
+      setSubmitting(false);
     }
   };
 
   if (loading) {
-    return <Loader />
+    return <Loader />;
   }
 
   return (
     <>
       <Head>
-        <title>Create Codat - Code Sharing Platform</title>
-        <meta name="description" content="Create and share your code snippets" />
+        <title>Edit Codat - Code Sharing Platform</title>
+        <meta name="description" content="Edit your code snippets" />
       </Head>
 
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white py-12 px-4 flex justify-center items-center">
@@ -94,11 +164,21 @@ const CreateCodat: NextPage = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-4xl font-extrabold mb-6 text-center">Create New Codat</h1>
+          <h1 className="text-4xl font-extrabold mb-6 text-center">
+            Edit Codat
+          </h1>
+
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded mb-6">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium mb-2">Title</label>
+              <label htmlFor="title" className="block text-sm font-medium mb-2">
+                Title
+              </label>
               <input
                 id="title"
                 name="title"
@@ -111,19 +191,28 @@ const CreateCodat: NextPage = () => {
             </div>
 
             <div>
-              <label htmlFor="description" className="block text-sm font-medium mb-2">Description</label>
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium mb-2"
+              >
+                Description
+              </label>
               <textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 bg-gray-900 rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none min-h-[100px]"
-                required
               />
             </div>
 
             <div>
-              <label htmlFor="language" className="block text-sm font-medium mb-2">Language</label>
+              <label
+                htmlFor="language"
+                className="block text-sm font-medium mb-2"
+              >
+                Language
+              </label>
               <select
                 id="language"
                 name="language"
@@ -134,14 +223,18 @@ const CreateCodat: NextPage = () => {
               >
                 <option value="">Select Language</option>
                 {languages.map((lang) => (
-                  <option key={lang} value={lang}>{lang}</option>
+                  <option key={lang} value={lang}>
+                    {lang}
+                  </option>
                 ))}
               </select>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor="code" className="block text-sm font-medium">Code</label>
+                <label htmlFor="code" className="block text-sm font-medium">
+                  Code
+                </label>
                 <label className="flex items-center space-x-2 cursor-pointer px-4 py-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition">
                   <Upload size={16} />
                   <span>Upload File</span>
@@ -165,11 +258,12 @@ const CreateCodat: NextPage = () => {
 
             <motion.button
               type="submit"
-              className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition transform hover:scale-105 active:scale-95"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition transform hover:scale-105 active:scale-95 disabled:bg-blue-500/50 disabled:cursor-not-allowed"
+              whileHover={{ scale: submitting ? 1 : 1.05 }}
+              whileTap={{ scale: submitting ? 1 : 0.95 }}
+              disabled={submitting}
             >
-              Create Codat
+              {submitting ? "Updating..." : "Update Codat"}
             </motion.button>
           </form>
         </motion.div>
@@ -178,4 +272,4 @@ const CreateCodat: NextPage = () => {
   );
 };
 
-export default CreateCodat;
+export default EditCodat;

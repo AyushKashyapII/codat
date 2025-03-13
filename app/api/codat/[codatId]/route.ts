@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import {aiDesc} from "@/lib/codatAIDescription";
 import {aiFunc} from "@/lib/codatAIFunction";
+import { currentProfile } from "@/lib/current-profile";
 
 export async function GET(req: NextRequest, { params }:  { params: Promise<{codatId: string}>}) {
   try {
@@ -46,19 +47,24 @@ export async function GET(req: NextRequest, { params }:  { params: Promise<{coda
 
 export async function PATCH(req: Request, { params }:  { params: Promise<{codatId: string}>}) {
   try {
-    const token = req.headers.get("Authorization")?.replace("Bearer ", "");
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized: Token missing" }, { status: 401 });
-    }
-    console.log(token);
+    // const token = req.headers.get("Authorization")?.replace("Bearer ", "");
+    // if (!token) {
+    //   return NextResponse.json({ error: "Unauthorized: Token missing" }, { status: 401 });
+    // }
+    // console.log(token);
     
-    const user = await db.profile.findUnique({
-      where: { token },
-      select: { id: true, name: true }
-    });
+    // const user = await db.profile.findUnique({
+    //   where: { token },
+    //   select: { id: true, name: true }
+    // });
     
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
+    // if (!user) {
+    //   return NextResponse.json({ error: "Unauthorized: Invalid token" }, { status: 401 });
+    //}
+
+    const user=await currentProfile();
+    if(!user){
+      return NextResponse.json("user not found")
     }
     
     const { codatId } = await params;
@@ -66,7 +72,7 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
       return NextResponse.json({ error: "Bad Request: Missing codatId" }, { status: 400 });
     }
     
-    console.log(user.id);
+    //console.log(user.id);
     
     
     const codat = await db.codat.findFirst({
@@ -129,7 +135,7 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
       where: { codatId },
       data: updateData
     });
-    
+    console.log("updated succesfully",codat)
     return NextResponse.json({
       message: "Codat updated successfully",
       codat: updatedCodat

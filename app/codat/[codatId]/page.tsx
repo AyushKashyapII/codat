@@ -8,7 +8,8 @@ import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
 import { createHighlighter } from "shiki";
 import Loader from "@/components/loader";
-import { ArrowLeft, Code, FileText } from "lucide-react";
+import { ArrowLeft, Code, FileText, PenSquare } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 const TAG_STORAGE_KEY = "visitedTags";
 const EXPIRY_TIME = 7 * 24 * 60 * 60 * 1000;
@@ -60,6 +61,10 @@ const useHighlightedCode = (code: string, language: string) => {
 
   return { highlightedCode, isLoading };
 };
+
+function DisplayAIResponse({ text }) {
+  return <ReactMarkdown>{text}</ReactMarkdown>;
+}
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { highlightedCode, isLoading } = useHighlightedCode(code, language);
@@ -116,7 +121,7 @@ const CodatPage = () => {
     if (!codat && codatId) {
       fetchCodat();
     }
-  }, [codat, codatId, router, setCodat]);
+  }, [codatId, router, setCodat, location]);
 
   if (!isClient) return <Loader />;
   if (!codat) return <Loader />;
@@ -148,9 +153,45 @@ const CodatPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
       <div className="container mx-auto px-4 py-8">
-        <Button variant="ghost" onClick={() => router.back()} className="mb-6">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back
-        </Button>
+        <div className="flex justify-between">
+          <div className="">
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="mb-6"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
+          </div>
+
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/codat/edit/${codatId}`)}
+              className="flex items-center"
+            >
+              <PenSquare className="mr-2 h-4 w-4 text-black" />
+              <p className="text-black">Edit</p>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowAIFunction(!showAIFunction)}
+              className="flex items-center ml-3"
+            >
+              {showAIFunction ? (
+                <>
+                  <Code className="mr-2 h-4 w-4 text-black" />
+                  <p className="text-black">View Code</p>
+                </>
+              ) : (
+                <>
+                  <FileText className="mr-2 h-4 w-4 text-black" />{" "}
+                  <p className="text-black">View AI Function</p>
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Side */}
@@ -176,32 +217,16 @@ const CodatPage = () => {
 
           {/* Right Side */}
           <div className="flex flex-col w-full">
-            <div className="flex justify-end mb-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowAIFunction(!showAIFunction)}
-                className="flex items-center"
-              >
-                {showAIFunction ? (
-                  <>
-                    <Code className="mr-2 h-4 w-4 text-black" />
-                    <p className="text-black">View Code</p>
-                  </>
-                ) : (
-                  <>
-                    <FileText className="mr-2 h-4 w-4 text-black" />{" "}
-                    <p className="text-black">View AI Function</p>
-                  </>
-                )}
-              </Button>
-            </div>
-
             <div className="w-full bg-gray-800 rounded-lg p-6 shadow-lg h-full">
               {showAIFunction ? (
                 <>
                   <h2 className="text-xl font-semibold mb-4">AI Function</h2>
                   <p className="text-gray-300">
-                    {codat.codatAIFunc || "AI function not available."}
+                    {codat.codatAIFunc ? (
+                      <DisplayAIResponse text={codat.codatAIFunc} />
+                    ) : (
+                      "AI function not available."
+                    )}
                   </p>
                 </>
               ) : (
