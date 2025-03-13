@@ -66,7 +66,7 @@ interface Profile {
   teamsModeratorOf: Teams[];
   codatsAuthored: Codat[];
   codatsSaved: Codat[];
-  codatsCollections: AllCollections[];
+  codatsCollections: Collection[];
   usersFollowed: UserFollow[];
   usersFollowing: UserFollow[];
 }
