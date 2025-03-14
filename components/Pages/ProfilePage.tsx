@@ -53,6 +53,7 @@ import {
 import SkeletonLoader from "@/components/Skeletonloader";
 import { createHighlighter } from "shiki";
 import ProfileLoaderSkeleton from "@/components/ProfileLoader";
+import Loader from "../loader";
 
 const useHighlightedCode = (code: string, language: string) => {
   const [highlightedCode, setHighlightedCode] = useState("");
@@ -86,6 +87,7 @@ const useHighlightedCode = (code: string, language: string) => {
   return { highlightedCode, isLoading };
 };
 
+
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { highlightedCode, isLoading } = useHighlightedCode(code, language);
 
@@ -106,7 +108,7 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
 export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers,fullFollowing}: { fullProfile: any , fullcollections:any,fullFollowers:any,fullFollowing:any}) {
   const [error, setError] = useState<string | null>(null);
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const sizePattern: Array<"small" | "medium" | "large"> = [
     "small",
     "medium",
@@ -121,10 +123,7 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
     medium: "col-span-1 row-span-2",
     large: "col-span-2 row-span-2",
   };
-
   
-  
-
   // State for editing collections
   const [editingCollection, setEditingCollection] = useState<string | null>(
     null
@@ -202,8 +201,10 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
       return fullcollections.flatMap((collection) => collection.collectionCodats);
     }, [fullcollections]);
     useEffect(() => {
+      setLoading(true)
       setCollections(fullcollections)
       setAllCodats(codatsMap);
+      setLoading(false)
     }, [fullcollections,codatsMap])
     
 
@@ -285,12 +286,6 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
     return (
       <div className="flex items-center justify-center h-64 text-red-500">
         {error}
-      </div>
-    );
-  if (!profile)
-    return (
-      <div className="flex items-center justify-center h-64 text-white">
-        Profile not found.
       </div>
     );
 
