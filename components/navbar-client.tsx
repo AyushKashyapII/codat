@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Home, Users, Search, User, LayoutDashboard } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { AuthButton } from "./AuthButton";
 
@@ -109,7 +109,7 @@ const NavbarClient = ({ profile }: { profile: any }) => {
         {/* Logo */}
         <div
             className="text-3xl font-bold tracking-tight cursor-pointer hover:text-gray-300 transition-colors duration-300"
-            onClick={() => router.push("/")}
+            onClick={() => redirect('/')}
         >
             Codat
         </div>
