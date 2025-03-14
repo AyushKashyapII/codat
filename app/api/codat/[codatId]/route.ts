@@ -71,6 +71,8 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
     if (!codatId) {
       return NextResponse.json({ error: "Bad Request: Missing codatId" }, { status: 400 });
     }
+
+    
     
     //console.log(user.id);
     
@@ -91,7 +93,7 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
       return NextResponse.json({ error: "Invalid JSON in request body" }, { status: 400 });
     }
     
-    const { code, language, description, title } = requestBody;
+    const { code, language, description, title,isPublic, likes } = requestBody;
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
@@ -99,6 +101,11 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
     if (language) updateData.codatLanguage = language;
     if (description) updateData.codatDescription = description;
     if (title) updateData.codatName = title;
+
+    if(isPublic!==undefined){
+      updateData.codatIsPublic=isPublic;
+    }
+    if(likes) updateData.codatLikes=likes;
     
     if (code) {
       const aiDescription = await aiDesc(code, language) || '';
@@ -129,13 +136,13 @@ export async function PATCH(req: Request, { params }:  { params: Promise<{codatI
         }
       });
     }
-    console.log("after update");
+    //console.log("after update");
     
     const updatedCodat = await db.codat.update({
       where: { codatId },
       data: updateData
     });
-    console.log("updated succesfully",codat)
+    //console.log("updated succesfully",codat)
     return NextResponse.json({
       message: "Codat updated successfully",
       codat: updatedCodat

@@ -25,9 +25,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{colle
             codatName: true,
             codatId: true,
             codatDescription: true,
+            codatAIDesc:true,
             codatLanguage: true,
             codatAuthor:true,
             codatCode:true,
+            codatLikes:true,
             createdAt: true,
             updatedAt: true,
           }

@@ -72,20 +72,21 @@ model Collections {
 }
 
 model Profile {
-  id                 String        @id @default(uuid())
-  email              String        @unique
-  phoneNumber        String?       @unique
-  name               String?       @unique @default("Codat Profile")
-  image              String?       @db.Text
-  attachedAiSearcher AiSearcher?   @relation("AiSearcher")
-  teamsPartsOf       Teams[]       @relation("TeamMembers")
-  teamsOwnerOf       Teams[]       @relation("TeamOwner")
-  teamsModeratorOf   Teams[]       @relation("TeamModerators")
-  codatsAuthored     Codat[]       @relation("CodatAuthor")
-  codatsSaved        Codat[]       @relation("CodatSaved")
-  codatsCollections  Collections[] @relation("CollectionOwner")
-  password           String?
-  token              String?       @unique @default(uuid())
+  id                 String      @id @default(uuid())
+  email              String      @unique
+  phoneNumber        String?     @unique
+  name               String?     @unique @default("Codat Profile")
+  image              String?     @db.Text
+  attachedAiSearcher AiSearcher? @relation("AiSearcher")
+  teamsPartsOf       Teams[]     @relation("TeamMembers")
+  teamsOwnerOf       Teams[]     @relation("TeamOwner")
+  teamsModeratorOf   Teams[]     @relation("TeamModerators")
+  codatsAuthored     Codat[]     @relation("CodatAuthor")
+  codatsSaved        Codat[]     @relation("CodatSaved")
+
+  codatsCollections Collections[] @relation("CollectionOwner")
+  password          String?
+  token             String?       @unique @default(uuid())
 
   usersFollowed  UserFollow[] @relation("UserFollowing")
   usersFollowing UserFollow[] @relation("UserFollowed")

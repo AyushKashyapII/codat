@@ -241,7 +241,6 @@ const CreateCodat: NextPage = () => {
                 htmlFor="language"
                 className="flex items-center space-x-2 text-sm font-medium mb-2"
               >
-                <span>Language</span>
                 {detectingLanguage && (
                   <span className="text-xs text-blue-400 animate-pulse">
                     Detecting language...

@@ -8,7 +8,14 @@ import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
 import { createHighlighter } from "shiki";
 import Loader from "@/components/loader";
-import { ArrowLeft, Code, FileText, PenSquare } from "lucide-react";
+import {
+  ArrowLeft,
+  Code,
+  FileText,
+  Globe,
+  Lock,
+  PenSquare,
+} from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 const TAG_STORAGE_KEY = "visitedTags";
@@ -86,11 +93,24 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
 const CodatPage = () => {
   const router = useRouter();
   const { codat, setCodat } = useModel();
+  const [isPublic, setIsPublic] = useState(true);
   const params = useParams();
   const codatId = params.codatId as string;
   const [isClient, setIsClient] = useState(false);
   const [showAIFunction, setShowAIFunction] = useState(false);
   const { isSignedIn, user } = useUser();
+
+  const handleVisiblity = async () => {
+    try {
+      const res = await axios.patch(`/api/codat/${codatId}`, {
+        isPublic: !isPublic,
+      });
+      setCodat(res.data.codat);
+      setIsPublic((value) => !value);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
   const userEmail = user?.emailAddresses[0].emailAddress;
 
@@ -109,6 +129,7 @@ const CodatPage = () => {
           if (res.data.codatTags.length) {
             saveTagsToLocalStorage(res.data.codatTags);
           }
+          setIsPublic(res.data.codatIsPublic);
         } else {
           router.push("/");
         }
@@ -167,8 +188,26 @@ const CodatPage = () => {
           <div className="flex justify-end mb-4">
             <Button
               variant="outline"
+              onClick={handleVisiblity}
+              className="flex items-center ml-3 hover:bg-blue-500"
+            >
+              {isPublic ? (
+                <>
+                  <Lock className="mr-2 h-4 w-4 text-black" />
+                  <p className="text-black">Make Codat Private</p>
+                </>
+              ) : (
+                <>
+                  <Globe className="mr-2 h-4 w-4 text-black" />{" "}
+                  <p className="text-black">Make Codat Public</p>
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="outline"
               onClick={() => router.push(`/codat/edit/${codatId}`)}
-              className="flex items-center"
+              className="flex items-center ml-3 hover:bg-blue-500"
             >
               <PenSquare className="mr-2 h-4 w-4 text-black" />
               <p className="text-black">Edit</p>
@@ -176,7 +215,7 @@ const CodatPage = () => {
             <Button
               variant="outline"
               onClick={() => setShowAIFunction(!showAIFunction)}
-              className="flex items-center ml-3"
+              className="flex items-center ml-3 hover:bg-blue-500"
             >
               {showAIFunction ? (
                 <>
