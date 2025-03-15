@@ -1,6 +1,8 @@
 import ProfilePage from "@/components/Pages/ProfilePage";
 import { db } from "@/lib/db";
 
+export const dynamic = 'force-dynamic';
+
 const page = async ({ params }:  { params: Promise<{username: string}>}) => {
 
   const {username} = await params;

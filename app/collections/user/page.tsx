@@ -1,19 +1,20 @@
 import CollectionsPage from "@/components/Pages/CollectionUser";
-import ProfilePage from "@/components/Pages/ProfilePage";
-import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
+import {auth} from "@clerk/nextjs/server";
+
+export const dynamic = 'force-dynamic';
 
 const page = async () => {
-  const profile = await currentProfile();
+  const { userId } = await auth();
 
-  if(!profile){
+  if(!userId){
     redirect('/')
   }
 
   const collections = await db.collections.findMany({
     where: {
-      collectionOwnerId: profile.id
+      collectionOwnerId: userId
     },
     select: {
       collectionId: true,
@@ -26,11 +27,11 @@ const page = async () => {
       },
     }
   })
-  
+
 
   return (
     <CollectionsPage
-    fullCollections={collections}
+      fullCollections={collections}
     />
   );
 }

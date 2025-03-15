@@ -2,14 +2,12 @@
 
 import {NextRequest, NextResponse} from "next/server";
 import {db} from "@/lib/db";
-import {currentProfile} from "@/lib/current-profile";
+import {auth} from "@clerk/nextjs/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const profile = await currentProfile();
-    console.log("hitting post");
-    console.log(profile);
-    if (!profile) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json(
         { error: 'User not logged in' },
         { status: 403 }
@@ -40,17 +38,18 @@ export async function POST(req: NextRequest) {
 
     console.log("createing ")
 
+    
     const collection = await db.collections.create({
       data: {
         collectionDesc,
         collectionName,
-        collectionOwnerId: profile.id,
+        collectionOwnerId: userId,
         collectionColor: "#FF5733",
       }
     })
 
     console.log("created",collection)    
-    return NextResponse.json(collection, { status: 200 })
+    return NextResponse.json({ status: 200 })
   } catch (e) {
     return NextResponse.json(
       { error: `Internal Server error: ${e}` },
