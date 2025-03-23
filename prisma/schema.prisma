@@ -46,6 +46,7 @@ model Teams {
   teamOwner       Profile       @relation("TeamOwner", fields: [teamOwnerId], references: [id], onDelete: Cascade)
   teamModerators  Profile[]     @relation("TeamModerators")
   teamCollections Collections[] @relation("TeamCollections")
+  teamImage       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

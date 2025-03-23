@@ -78,9 +78,9 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   }
 
   return (
-    <div className="p-4 rounded-md overflow-auto text-sm bg-[#0d1117] max-h-[calc(100vh-12rem)] shadow-lg w-full">
+    <div className="p-4 rounded-md overflow-auto text-base bg-[#0d1117] max-h-[calc(100vh-12rem)] shadow-lg w-full">
       <div
-        className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0 [&_.shiki]:!bg-transparent"
+        className="[&_pre]:!bg-transparent [&_code]:!text-[1.3em] [&_.line]:!leading-7 [&_pre]:!p-0 [&_.shiki]:!bg-transparent"
         dangerouslySetInnerHTML={{ __html: highlightedCode }}
       />
     </div>
@@ -195,12 +195,12 @@ function ExplorePage({
     if (!tags || !tags.length) return null;
 
     return (
-      <div className="mb-4  backdrop-blur-sm rounded-lg p-4">
-        <h3 className="text-lg font-medium text-white mb-2 flex items-center">
-          <Folder className="mr-2" size={18} />
+      <div className="mb-6 backdrop-blur-sm rounded-lg p-5 w-full">
+        <h3 className="text-xl font-medium text-white mb-3 flex items-center">
+          <Folder className="mr-3" size={22} />
           {title}
         </h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {tags.map((tag) => (
             <span
               key={tag}
@@ -208,7 +208,7 @@ function ExplorePage({
                 selectedTags.includes(tag)
                   ? "bg-blue-600 text-white border border-blue-400"
                   : "bg-gray-800/70 text-gray-300 hover:bg-gray-700/70"
-              } px-3 py-1 rounded-md text-xs transition cursor-pointer`}
+              } px-4 py-2 rounded-md text-sm transition cursor-pointer`}
               onClick={() => handleTagClick(tag)}
             >
               {tag}
@@ -218,30 +218,6 @@ function ExplorePage({
       </div>
     );
   };
-
-  //   const handleTagClick = async (tag: string) => {
-  //     setIsLoading(true);
-  //     try {
-  //       const res = await axios.post("/api/codat/recommend-codats", {
-  //         tags: [tag],
-  //       });
-  //       setRecommendedCodats(res.data);
-
-  //       // If guest user, add to visited tags
-  //       if (isGuest) {
-  //         const updatedVisitedTags = [...new Set([...visitedTags, tag])];
-  //         setVisitedTags(updatedVisitedTags);
-  //         localStorage.setItem(
-  //           TAG_STORAGE_KEY,
-  //           JSON.stringify({ tags: updatedVisitedTags })
-  //         );
-  //       }
-  //     } catch (error) {
-  //       console.error("Failed to fetch recommendations for tag:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
 
   // Filter out tags that are already in user's tags
   const userTags = [
@@ -260,24 +236,24 @@ function ExplorePage({
     if (!otherTags || !otherTags.length) return null;
 
     return (
-      <div className="mb-4 bg-gray-900/50 backdrop-blur-sm rounded-lg p-4 w-[120%]">
-        <div className="flex items-center mb-2">
-          <h3 className="text-lg font-medium text-white flex items-center mr-8">
-            <Hash className="mr-2" size={18} />
+      <div className="mb-6 bg-gray-900/50 backdrop-blur-sm rounded-lg p-5 w-full">
+        <div className="flex items-center mb-3">
+          <h3 className="text-xl font-medium text-white flex items-center mr-8">
+            <Hash className="mr-3" size={22} />
             Explore Other Codats
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {selectedTags.length > 0 && (
               <>
                 <button
                   onClick={handleClearAllTags}
-                  className="text-sm text-red-400 hover:text-red-300 transition"
+                  className="text-base text-red-400 hover:text-red-300 transition"
                 >
                   Clear All
                 </button>
                 <button
                   onClick={handleSearchByTags}
-                  className="bg-blue-600 hover:bg-blue-500 text-white text-sm px-3 py-1 rounded"
+                  className="bg-blue-600 hover:bg-blue-500 text-white text-base px-4 py-2 rounded"
                 >
                   Search
                 </button>
@@ -285,7 +261,7 @@ function ExplorePage({
             )}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {tagsToDisplay.map((tag) => (
             <span
               key={tag}
@@ -293,7 +269,7 @@ function ExplorePage({
                 selectedTags.includes(tag)
                   ? "bg-blue-600 text-white border border-blue-400"
                   : "bg-gray-800/70 text-gray-300 hover:bg-gray-700/70"
-              } px-3 py-1 rounded-md text-xs transition cursor-pointer flex items-center`}
+              } px-4 py-2 rounded-md text-sm transition cursor-pointer flex items-center`}
               onClick={() => handleTagClick(tag)}
             >
               {tag}
@@ -304,7 +280,7 @@ function ExplorePage({
         {otherTags.length > 8 && (
           <button
             onClick={() => setShowAllTags(!showAllTags)}
-            className="mt-3 text-blue-400 hover:text-blue-300 text-sm font-medium"
+            className="mt-4 text-blue-400 hover:text-blue-300 text-base font-medium"
           >
             {showAllTags
               ? "Show fewer tags"
@@ -316,7 +292,7 @@ function ExplorePage({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white w-full">
       {/* Animated Background Particles */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(100)].map((_, i) => (
@@ -334,10 +310,11 @@ function ExplorePage({
         ))}
       </div>
 
-      <div className="container mx-auto px-6 py-16 relative z-10">
-        <h2 className="text-4xl font-bold mb-12 text-center">Explore Codats</h2>
+      <div className="container px-4 py-16 relative z-10 mx-auto">
+        <h2 className="text-5xl font-bold mb-16 text-center">Explore Codats</h2>
 
-        <div className="flex flex-col lg:flex-row gap-8 ">
+        <div className="flex flex-col lg:flex-row gap-5 w-full">
+          {/* Left Section (30%) - Tags */}
           <div className="lg:w-3/12 space-y-8">
             {renderTagList(savedCodatTags, "Your Saved Tags")}
             {renderTagList(createdCodatTags, "Your Created Tags")}
@@ -346,14 +323,14 @@ function ExplorePage({
           </div>
 
           {/* Right Section (70%) - Cards */}
-          <div className="lg:w-8/12 flex flex-col">
-            <h2 className="sticky top-0 text-2xl font-bold mb-6 z-10 bg-transparent backdrop-blur-sm py-2">
+          <div className="lg:w-9/12 flex flex-col">
+            <h2 className="sticky top-0 text-3xl font-bold mb-8 z-10 bg-transparent backdrop-blur-sm py-3">
               Recommended Codats
             </h2>
             <div className="overflow-y-auto flex-1">
               {isLoading ? (
                 <div className="flex justify-center items-center h-64">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
                 </div>
               ) : recommendedCodats && recommendedCodats.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -361,33 +338,33 @@ function ExplorePage({
                     <div
                       key={codat.codatId}
                       className={`${getLanguageColor(codat.codatLanguage)} 
-              rounded-lg p-5 relative overflow-hidden group cursor-pointer
-              transition transform hover:shadow-lg hover:shadow-blue-500/20
-              h-auto`}
+                      rounded-lg p-6 relative overflow-hidden group cursor-pointer
+                      transition transform hover:shadow-lg hover:shadow-blue-500/20
+                      h-auto`}
                       onClick={() => router.push(`/codat/${codat.codatId}`)}
                     >
                       {/* Language Icon */}
-                      <div className="absolute top-0 right-0 p-3">
+                      <div className="absolute top-0 right-0 p-4">
                         <Code
                           className="text-white/30 group-hover:text-white/50 transition-all"
-                          size={24}
+                          size={28}
                         />
                       </div>
 
                       <div className="flex flex-col justify-between h-full">
                         <div>
-                          <div className="flex justify-between items-center mb-1">
-                            <h4 className="text-gray-300 text-xs">
+                          <div className="flex justify-between items-center mb-2">
+                            <h4 className="text-gray-300 text-sm">
                               {codat.codatLanguage || "Unknown"}
                             </h4>
                           </div>
-                          <h3 className="text-lg font-bold mb-2">
+                          <h3 className="text-xl font-bold mb-3">
                             {codat.codatName}
                           </h3>
 
                           {/* Code snippet preview */}
                           {codat.codatCode && (
-                            <div className="bg-black/30 rounded p-2 my-2 overflow-hidden max-h-24 font-mono text-xs text-gray-200">
+                            <div className="bg-black/30 rounded p-3 my-3 overflow-hidden max-h-28 font-mono text-sm text-gray-200">
                               <pre className="line-clamp-3">
                                 {codat.codatCode?.length > 100
                                   ? codat.codatCode.substring(0, 100) + "..."
@@ -397,26 +374,26 @@ function ExplorePage({
                           )}
 
                           {/* Author info */}
-                          <div className="flex items-center mt-2">
-                            <Users size={14} className="mr-1 text-gray-400" />
-                            <p className="text-gray-300 text-xs">
+                          <div className="flex items-center mt-3">
+                            <Users size={16} className="mr-2 text-gray-400" />
+                            <p className="text-gray-300 text-sm">
                               by {codat.codatAuthor?.name || "Unknown Author"}
                             </p>
                           </div>
 
                           {/* Tags */}
-                          <div className="flex flex-wrap gap-1 mt-2">
+                          <div className="flex flex-wrap gap-2 mt-3">
                             {codat.codatTags &&
                               codat.codatTags.slice(0, 3).map((tag) => (
                                 <span
                                   key={tag}
-                                  className="bg-black/30 text-gray-300 px-2 py-0.5 rounded text-xs"
+                                  className="bg-black/30 text-gray-300 px-3 py-1 rounded text-sm"
                                 >
                                   {tag}
                                 </span>
                               ))}
                             {codat.codatTags && codat.codatTags.length > 3 && (
-                              <span className="bg-black/30 text-gray-300 px-2 py-0.5 rounded text-xs">
+                              <span className="bg-black/30 text-gray-300 px-3 py-1 rounded text-sm">
                                 +{codat.codatTags.length - 3}
                               </span>
                             )}
@@ -428,18 +405,18 @@ function ExplorePage({
                 </div>
               ) : (
                 <div className="col-span-2 p-12 text-center bg-gray-900/30 rounded-lg">
-                  <Code size={48} className="mx-auto mb-4 text-gray-500" />
-                  <h4 className="text-xl font-semibold mb-2">
+                  <Code size={64} className="mx-auto mb-6 text-gray-500" />
+                  <h4 className="text-2xl font-semibold mb-3">
                     No Recommendations Found
                   </h4>
-                  <p className="text-gray-400 mb-4">
+                  <p className="text-gray-400 mb-6 text-lg">
                     We couldn't find any codats matching your interests.
                   </p>
                   <button
-                    className="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-md inline-flex items-center"
+                    className="bg-white/20 hover:bg-white/30 text-white px-8 py-3 rounded-md inline-flex items-center text-lg"
                     onClick={() => router.push("/explore")}
                   >
-                    Explore More <ArrowRight size={16} className="ml-2" />
+                    Explore More <ArrowRight size={20} className="ml-3" />
                   </button>
                 </div>
               )}

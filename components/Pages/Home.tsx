@@ -275,7 +275,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-16 relative z-10 ">
+      <div className=" mx-2  py-16 relative z-10 ">
         <h2 className="text-4xl font-bold mb-12 text-center"></h2>
 
         {loading ? (

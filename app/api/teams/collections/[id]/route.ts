@@ -27,6 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{id: s
       select: {
         collectionName: true,
         collectionDesc: true,
+        collectionId:true,
         createdAt: true,
         updatedAt: true,
         _count: {
@@ -60,6 +61,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{id: s
     if (!collection) {
       return NextResponse.json({ error: "collection not found"}, { status: 404 })
     }
+
+    console.log("collection /id team", collection);
     
     return NextResponse.json(collection, { status: 200 })
   } catch (e) {
