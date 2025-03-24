@@ -34,7 +34,6 @@ interface Codat {
   collectionId: string | null;
   createdAt: string;
   updatedAt: string;
-  
 }
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -88,7 +87,6 @@ const useHighlightedCode = (code: string, language: string) => {
   return { highlightedCode, isLoading };
 };
 
-
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { highlightedCode, isLoading } = useHighlightedCode(code, language);
 
@@ -106,7 +104,17 @@ const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   );
 };
 
-export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers,fullFollowing}: { fullProfile: any , fullcollections:any,fullFollowers:any,fullFollowing:any}) {
+export default function ProfilePage({
+  fullProfile,
+  fullcollections,
+  fullFollowers,
+  fullFollowing,
+}: {
+  fullProfile: any;
+  fullcollections: any;
+  fullFollowers: any;
+  fullFollowing: any;
+}) {
   const [error, setError] = useState<string | null>(null);
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [loading, setLoading] = useState(true);
@@ -124,7 +132,7 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
     medium: "col-span-1 row-span-2",
     large: "col-span-2 row-span-2",
   };
-  
+
   // State for editing collections
   const [editingCollection, setEditingCollection] = useState<string | null>(
     null
@@ -132,8 +140,6 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
   const [editedName, setEditedName] = useState("");
   const [editedColor, setEditedColor] = useState("#3E95FF");
   const [collections, setCollections] = useState<Collection[]>([]);
-
-
 
   // Available color options
   const colorOptions = [
@@ -196,19 +202,17 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
     setEditingCollection(null);
   };
 
-    const profile = fullProfile;
-    const codatsMap:Record<string, Codat[]>  = {};
-    const flattenedCodats = useMemo(() => {
-      return fullcollections.flatMap((collection: Collection) => collection.collectionCodats);
-    }, [fullcollections]);
-    useEffect(() => {
-      setLoading(true)
-      setCollections(fullcollections)
-      setAllCodats(codatsMap);
-      setLoading(false)
-    }, [fullcollections,codatsMap])
-    
-
+  const profile = fullProfile;
+  const codatsMap: Record<string, Codat[]> = {};
+  const flattenedCodats = useMemo(() => {
+    return fullcollections.flatMap((collection) => collection.collectionCodats);
+  }, [fullcollections]);
+  useEffect(() => {
+    setLoading(true);
+    setCollections(fullcollections);
+    setAllCodats(codatsMap);
+    setLoading(false);
+  }, [fullcollections]);
 
   const followers = fullFollowers;
   const following = fullFollowing;
@@ -468,7 +472,7 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
                           </div>
                           <div className="flex items-center">
                             <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded-full mr-2">
-                              {/* {collection._count.collectionCodats} */}
+                              {collection?.collectionCodats?.length}
                             </span>
                             <button
                               onClick={(e) => {
@@ -607,10 +611,10 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
                               {/* Description that appears on hover */}
                               <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <p className="text-white/70 mb-3">
-                                  {codat.codatDescription?.length > 250
-                                    ? codat.codatDescription.substring(0, 250) +
+                                  {codat.codatAIDesc?.length > 250
+                                    ? codat.codatAIDesc.substring(0, 250) +
                                       "..."
-                                    : codat.codatDescription ||
+                                    : codat.codatAIDesc ||
                                       "No Description Available"}
                                 </p>
                                 <button className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-md text-sm flex items-center">
