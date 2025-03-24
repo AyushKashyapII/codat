@@ -109,7 +109,7 @@ const NavbarClient = ({ profile }: { profile: any }) => {
         {/* Logo */}
         <div
             className="text-3xl font-bold tracking-tight cursor-pointer hover:text-gray-300 transition-colors duration-300"
-            onClick={() => redirect('/')}
+            onClick={() => router.push('/')}
         >
             Codat
         </div>

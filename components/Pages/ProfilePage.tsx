@@ -15,6 +15,7 @@ interface Collection {
   collectionName: string;
   collectionDesc: string;
   collectionColor?: string; // Add color field
+  collectionCodats: Codat[];
   _count: {
     collectionCodats: number;
   };
@@ -198,7 +199,7 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
     const profile = fullProfile;
     const codatsMap:Record<string, Codat[]>  = {};
     const flattenedCodats = useMemo(() => {
-      return fullcollections.flatMap((collection) => collection.collectionCodats);
+      return fullcollections.flatMap((collection: Collection) => collection.collectionCodats);
     }, [fullcollections]);
     useEffect(() => {
       setLoading(true)
@@ -372,7 +373,7 @@ export default function ProfilePage({ fullProfile ,fullcollections,fullFollowers
         </div>
 
         {loading ? (
-          <SkeletonLoader />
+          <SkeletonLoader ownProfile={true} />
         ) : (
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Left Section (30%) */}
