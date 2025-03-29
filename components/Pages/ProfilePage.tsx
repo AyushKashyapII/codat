@@ -15,6 +15,7 @@ interface Collection {
   collectionName: string;
   collectionDesc: string;
   collectionColor?: string; // Add color field
+  collectionCodats: Codat[];
   _count: {
     collectionCodats: number;
   };
