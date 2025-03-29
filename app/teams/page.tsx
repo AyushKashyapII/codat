@@ -11,6 +11,7 @@ import {
   UserPlus,
   ChevronRight,
 } from "lucide-react";
+import InviteLinkInput from "@/components/InviteLinkInput";
 
 interface Team {
   role: string;
@@ -72,6 +73,8 @@ export default function TeamsPage() {
     }
   };
 
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+
   const getTeamColor = (teamId: string) => {
     const colors = [
       "#3E95FF",
@@ -93,15 +96,51 @@ export default function TeamsPage() {
   return (
     <div className="min-h-screen bg-[#0F1220] text-white">
       <div className="max-w-6xl mx-auto p-6">
+        <div className="flex flex-col">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Teams</h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-[#3E95FF] text-white rounded-md hover:bg-[#3384E3] transition flex items-center"
-          >
-            <Plus size={18} className="mr-2" /> Create Team
-          </button>
+          <div className="flex gap-4">
+             <button
+              onClick={() => setJoinModalOpen((value=>!value))}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition flex items-center"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="mr-2"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Join via Invite
+            </button> 
+
+           
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="px-4 py-2 bg-[#3E95FF] text-white rounded-md hover:bg-[#3384E3] transition flex items-center"
+            >
+              <Plus size={18} className="mr-2" /> Create Team
+            </button>
+          </div>
         </div>
+        <div className="flex justify-between mb-5">
+          <p> </p>
+            {joinModalOpen? (<InviteLinkInput
+            />):("")}
+            
+        </div>
+        </div>
+        
 
         <div className="mb-6 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

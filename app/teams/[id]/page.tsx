@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface TeamMember {
   name: string | null;
@@ -41,7 +42,6 @@ interface Team {
   teamCollections: TeamCollection[];
 }
 
-// Updated to store codats by collection ID and by member ID
 interface CodatsData {
   byCollection: Record<string, Codat[]>;
   byMember: Record<string, Codat[]>;
@@ -220,6 +220,7 @@ export default function TeamPage() {
   const navigateToMemberProfile = (memberId: string) => {
     router.push(`/users/${memberId}`);
   };
+  const [isCopied, setIsCopied] = useState(false);
 
   if (loading)
     return (
@@ -254,14 +255,54 @@ export default function TeamPage() {
     <div className="min-h-screen bg-[#121628] text-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Team Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">{team.teamName}</h1>
-          <div className="flex items-center mt-2">
-            <span className="text-gray-400">
-              Team Owner: {team.teamOwner.name || "Unknown"}
-            </span>
-            <span className="mx-4 text-gray-600">|</span>
-            <span className="text-gray-400">Members: {allMembers.length}</span>
+        <div className="flex justify-between">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white">{team.teamName}</h1>
+            <div className="flex items-center mt-2">
+              <span className="text-gray-400">
+                Team Owner: {team.teamOwner.name || "Unknown"}
+              </span>
+              <span className="mx-4 text-gray-600">|</span>
+              <span className="text-gray-400">
+                Members: {allMembers.length}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col justify-center">
+            <button
+              onClick={() => {
+                
+                const inviteLink = `${team.teamId}`;
+                navigator.clipboard
+                  .writeText(inviteLink)
+                  .then(() => {
+                 
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 3000);
+                  })
+                  .catch((err) => {
+                    console.error("Failed to copy: ", err);
+                  });
+              }}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M16 18v2a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2"></path>
+                <rect x="8" y="2" width="12" height="12" rx="2" ry="2"></rect>
+              </svg>
+              {isCopied ? "Copied!" : "Generate Invite Link"}
+            </button>
           </div>
         </div>
 
@@ -525,7 +566,7 @@ export default function TeamPage() {
                         By: {codat.authorName || "Unknown"}
                       </div>
                       <div className="text-xs text-gray-400 truncate">
-                        {codat.content?.substring(0, 100)}...
+                        {codat.content?.substring(0, 200)}...
                       </div>
                     </div>
                   ))

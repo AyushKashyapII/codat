@@ -33,8 +33,11 @@ const page = async ({ params }: { params: Promise<{ username: string }> }) => {
           follower: true,
         },
       },
+
     },
   });
+
+
 
   if (!profile) {
     return <div>Not Found</div>;

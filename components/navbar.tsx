@@ -5,9 +5,7 @@ import NavbarClient from "./navbar-client";
 const Navbar = async () => {
   const profile = await currentProfile();
   if (!profile) {
-    return (
-      <></>
-    );
+    return <></>;
   }
 
   return (

@@ -35,7 +35,7 @@ interface Codat {
   updatedAt: string;
 }
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { useModel } from "@/hooks/user-model-store";
@@ -53,6 +53,7 @@ import SkeletonLoader from "@/components/Skeletonloader";
 import { createHighlighter } from "shiki";
 import ProfileLoaderSkeleton from "@/components/ProfileLoader";
 import Loader from "../loader";
+import { Teams } from "@prisma/client";
 
 const useHighlightedCode = (code: string, language: string) => {
   const [highlightedCode, setHighlightedCode] = useState("");
@@ -117,6 +118,7 @@ export default function ProfilePage({
   const [error, setError] = useState<string | null>(null);
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [loading, setLoading] = useState(true);
+  const [teams, setTeams] = useState([]);
   const sizePattern: Array<"small" | "medium" | "large"> = [
     "small",
     "medium",
@@ -204,28 +206,35 @@ export default function ProfilePage({
   const profile = fullProfile;
   const codatsMap: Record<string, Codat[]> = {};
   const flattenedCodats = useMemo(() => {
+    
     return fullcollections.flatMap((collection) => collection.collectionCodats);
   }, [fullcollections]);
+
   useEffect(() => {
     setLoading(true);
     setCollections(fullcollections);
     setAllCodats(codatsMap);
     setLoading(false);
+
+    console.log(flattenedCodats)
   }, [fullcollections]);
 
   const followers = fullFollowers;
   const following = fullFollowing;
 
-  const teams = [
-    { name: "Algorithm Enthusiasts", members: 8 },
-    { name: "CP Warriors", members: 6 },
-    { name: "Data Structure Wizards", members: 7 },
-    { name: "Interview Prep Group", members: 12 },
-    { name: "LeetCode Daily", members: 15 },
-    { name: "System Design Team", members: 5 },
-    { name: "Hackathon Squad", members: 8 },
-    { name: "DSA Mentors", members: 4 },
-  ];
+  useMemo(() => {
+    if (fullProfile) {
+      setTeams((prev) => {
+        const allTeams = [
+          ...(fullProfile.teamsPartsOf || []),
+          ...(fullProfile.teamsModeratorOf || []),
+          ...(fullProfile.teamsOwnerOf || []),
+        ];
+
+        return allTeams;
+      });
+    }
+  }, [fullProfile]);
 
   const getCardSize = (codat: Codat | undefined) => {
     const codeDescriptionLength = codat?.codatDescription?.length || 0;
@@ -342,38 +351,7 @@ export default function ProfilePage({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Following Section */}
-          {/* <section className="bg-[#1A2035] rounded-lg p-6 shadow-lg border-t-4 border-[#F97316] md:col-span-2">
-            <h2 className="text-xl font-semibold mb-4 flex items-center">
-              <span className="w-2 h-6 bg-[#F97316] mr-3 rounded-full"></span>
-              Following
-            </h2>
-            <div className="bg-[#F97316]/10 p-3 rounded-md">
-              {profile.usersFollowed?.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {profile.usersFollowed.map(({ following }) => (
-                    <div
-                      key={following.id}
-                      className="bg-[#1A2035] p-3 rounded-md hover:bg-[#232942] transition"
-                    >
-                      {following.image && (
-                        <img
-                          src={following.image}
-                          alt={following.name}
-                          className="w-10 h-10 rounded-full mb-2"
-                        />
-                      )}
-                      <p className="font-medium">{following.name}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[#B8C0D2]">No users followed.</p>
-              )}
-            </div>
-          </section> */}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
         {loading ? (
           <SkeletonLoader ownProfile={true} />
@@ -510,12 +488,18 @@ export default function ProfilePage({
                 <div className="overflow-y-auto scrollbar-hide flex-grow mt-2">
                   {teams.map((team) => (
                     <div
-                      key={team.name}
+                      key={team.teamName}
+                      onClick={() => {
+                        router.push(`/teams/${team.teamId}`);
+                      }}
                       className="flex items-center justify-between p-3 rounded-md hover:bg-gray-800/50 transition cursor-pointer"
                     >
-                      <span className="font-medium">{team.name}</span>
+                      <span className="font-medium">{team.teamName}</span>
                       <span className="text-sm text-gray-400 bg-gray-800 px-2 py-1 rounded-full">
-                        {team.members} members
+                        {(team.teamMembers?.length || 0) +
+                          (team.teamModerators?.length || 0) +
+                          1}{" "}
+                        members
                       </span>
                     </div>
                   ))}
@@ -600,9 +584,9 @@ export default function ProfilePage({
                                   />
                                   <p className="text-gray-300 text-sm">
                                     by{" "}
-                                    {typeof codat.codatAuthor === "object"
-                                      ? codat.codatAuthor.name
-                                      : codat.codatAuthor || "Unknown Author"}
+                                    {codat.codatAuthor
+                                      ? codat.codatAuthor.name 
+                                      : "Unknown Author"}
                                   </p>
                                 </div>
                               </div>
