@@ -13,7 +13,7 @@ export const currentProfile = async() => {
             id: userId
         }
     });
-    // console.log('Current profile:', profile);
+     //console.log('Current profile:', profile);
 
     return profile;
 }

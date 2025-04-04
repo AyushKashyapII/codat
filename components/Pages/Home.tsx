@@ -263,6 +263,9 @@ export default function HomePage() {
             transition transform hover:scale-105
             animate-bounce-in
             relative overflow-hidden group mb-8"
+            // onClick={()=>{
+            //   router.push(`signup`)
+            // }}
             >
               Get Started
             </button>

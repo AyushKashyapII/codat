@@ -35,6 +35,13 @@ interface Codat {
   createdAt: string;
   updatedAt: string;
 }
+interface Team {
+  teamName: string;
+  teamId: string;
+  teamMembers: [];
+  teamModerators: [];
+  teamOwner: [];
+}
 
 import React, { use, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -49,12 +56,16 @@ import {
   Pencil,
   X,
   Check,
+  UserMinus,
 } from "lucide-react";
 import SkeletonLoader from "@/components/Skeletonloader";
 import { createHighlighter } from "shiki";
 import ProfileLoaderSkeleton from "@/components/ProfileLoader";
 import Loader from "../loader";
 import { Teams } from "@prisma/client";
+import { useUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
+import { currentProfile } from "@/lib/current-profile";
 
 const useHighlightedCode = (code: string, language: string) => {
   const [highlightedCode, setHighlightedCode] = useState("");
@@ -110,16 +121,27 @@ export default function ProfilePage({
   fullcollections,
   fullFollowers,
   fullFollowing,
+  currentUser,
 }: {
   fullProfile: any;
   fullcollections: any;
   fullFollowers: any;
   fullFollowing: any;
+  currentUser: any;
 }) {
   const [error, setError] = useState<string | null>(null);
   const [allCodats, setAllCodats] = useState<Record<string, Codat[]>>({});
   const [loading, setLoading] = useState(true);
-  const [teams, setTeams] = useState([]);
+  const [teams, setTeams] = useState<Team | []>([]);
+
+  const [seeingOwnProfile, setSeeingOwnProfile] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      setSeeingOwnProfile(currentUser.id === fullProfile.id);
+    }
+  }, [currentUser, fullProfile]);
+
   const sizePattern: Array<"small" | "medium" | "large"> = [
     "small",
     "medium",
@@ -142,6 +164,16 @@ export default function ProfilePage({
   const [editedName, setEditedName] = useState("");
   const [editedColor, setEditedColor] = useState("#3E95FF");
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    if (currentUser && fullFollowing) {
+      const isCurrentUserFollowing = fullFollowing.some(
+        (followingRelation) => followingRelation.followingId === fullProfile.id
+      );
+      setIsFollowing(isCurrentUserFollowing);
+    }
+  }, [currentUser, fullFollowing, fullProfile.id]);
 
   // Available color options
   const colorOptions = [
@@ -204,10 +236,26 @@ export default function ProfilePage({
     setEditingCollection(null);
   };
 
+  const handleFollowToggle = async () => {
+    if (!currentUser) return;
+    try {
+      if (isFollowing) {
+        setIsFollowingCount((prev) => prev - 1);
+        await axios.delete(`/api/followings/${fullProfile.id}`);
+        setIsFollowing(false);
+      } else {
+        setIsFollowingCount((prev) => prev + 1);
+        await axios.post(`/api/followings/${fullProfile.id}`);
+        setIsFollowing(true);
+      }
+    } catch (error) {
+      console.error("Error toggling follow status:", error);
+    }
+  };
+
   const profile = fullProfile;
   const codatsMap: Record<string, Codat[]> = {};
   const flattenedCodats = useMemo(() => {
-    
     return fullcollections.flatMap((collection) => collection.collectionCodats);
   }, [fullcollections]);
 
@@ -217,11 +265,15 @@ export default function ProfilePage({
     setAllCodats(codatsMap);
     setLoading(false);
 
-    console.log(flattenedCodats)
+    console.log(flattenedCodats[0]);
   }, [fullcollections]);
 
-  const followers = fullFollowers;
-  const following = fullFollowing;
+  const following = fullFollowers;
+  const followers = fullFollowing;
+
+  const [isFollowingCount, setIsFollowingCount] = useState(
+    followers.length ? followers.length : 0
+  );
 
   useMemo(() => {
     if (fullProfile) {
@@ -313,7 +365,7 @@ export default function ProfilePage({
             <div
               className="flex items-center gap-6 relative group cursor-pointer"
               onClick={() => {
-                router.push(`/profile/edit`);
+                seeingOwnProfile && router.push(`/profile/edit`);
               }}
             >
               {profile.image && (
@@ -326,29 +378,79 @@ export default function ProfilePage({
               <div>
                 <h1 className="text-3xl font-bold">{profile.name}</h1>
                 <p className="text-[#B8C0D2]">{profile.email}</p>
-                <div className="absolute hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded mt-1 whitespace-nowrap">
-                  Click to edit profile
-                </div>
+                {seeingOwnProfile ? (
+                  <div className="absolute hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded mt-1 whitespace-nowrap">
+                    Click to edit profile
+                  </div>
+                ) : (
+                  <div></div>
+                )}
               </div>
             </div>
 
             {/* Right side - Followers/Following */}
-            <div className="bg-[#141B2D] rounded-lg p-4">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div className="border-r border-gray-700 pr-4">
-                  <h3 className="text-[#3E95FF] font-medium">Following</h3>
-                  <p className="text-xl font-bold">
-                    {following ? following.length : 0}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-[#3E95FF] font-medium">Followers</h3>
-                  <p className="text-xl font-bold">
-                    {followers ? followers.length : 0}
-                  </p>
+            {seeingOwnProfile ? (
+              <div className="bg-[#141B2D] rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div className="border-r border-gray-700 pr-4">
+                    <h3 className="text-[#3E95FF] font-medium">Following</h3>
+                    <p className="text-xl font-bold">
+                      {following ? following.length : 0}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-[#3E95FF] font-medium">Followers</h3>
+                    <p className="text-xl font-bold">{isFollowingCount}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="bg-[#141B2D] rounded-lg p-4">
+                <div className="grid grid-cols-2 gap-4 text-center mb-3">
+                  <div className="border-r border-gray-700 pr-4">
+                    <h3 className="text-[#3E95FF] font-medium">Following</h3>
+                    <p className="text-xl font-bold">
+                      {following ? following.length : 0}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-[#3E95FF] font-medium">Followers</h3>
+                    <p className="text-xl font-bold">{isFollowingCount}</p>
+                  </div>
+                </div>
+
+                {/* Follow/Following Button */}
+                {currentUser && (
+                  <button
+                    className={`w-full py-2 rounded-md font-medium transition-all flex items-center justify-center gap-2 ${
+                      isFollowing
+                        ? "bg-[#3E95FF]/20 text-[#3E95FF] hover:bg-red-500/10 hover:text-red-500 group"
+                        : "bg-[#3E95FF] text-white hover:bg-[#2D84EE]"
+                    }`}
+                    onClick={handleFollowToggle}
+                  >
+                    {isFollowing ? (
+                      <>
+                        <Check size={18} className="group-hover:hidden" />
+                        <UserMinus
+                          size={18}
+                          className="hidden group-hover:block"
+                        />
+                        <span className="group-hover:hidden">Following</span>
+                        <span className="hidden group-hover:block">
+                          Unfollow
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus size={18} />
+                        <span>Follow</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -487,7 +589,7 @@ export default function ProfilePage({
                 </div>
 
                 <div className="overflow-y-auto scrollbar-hide flex-grow mt-2">
-                  {teams.map((team) => (
+                  {teams.map((team: Team) => (
                     <div
                       key={team.teamName}
                       onClick={() => {
@@ -519,7 +621,7 @@ export default function ProfilePage({
                   style={{ minHeight: "120vh" }}
                 >
                   {flattenedCodats.length > 0 ? (
-                    flattenedCodats.map((codat, index) => {
+                    flattenedCodats.map((codat: Codat, index) => {
                       const sizeClass = sizeClasses[getSizeClass(index)];
                       // Find the collection for this codat to get its color
                       const collection = collections.find(
@@ -586,8 +688,8 @@ export default function ProfilePage({
                                   <p className="text-gray-300 text-sm">
                                     by{" "}
                                     {codat.codatAuthor
-                                      ? codat.codatAuthor.name 
-                                      : "Unknown Author"}
+                                      ? codat.codatAuthor.name
+                                      : profile.name}
                                   </p>
                                 </div>
                               </div>

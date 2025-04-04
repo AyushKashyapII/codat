@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { createHighlighter } from "shiki";
 
 interface TeamMember {
   name: string | null;
@@ -47,6 +48,55 @@ interface CodatsData {
   byMember: Record<string, Codat[]>;
   allCodats: Codat[];
 }
+
+const useHighlightedCode = (code: string, language: string) => {
+  const [highlightedCode, setHighlightedCode] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const highlightCode = async () => {
+      try {
+        const highlighter = await createHighlighter({
+          themes: ["github-dark"],
+          langs: [language.toLowerCase()],
+        });
+
+        const highlighted = highlighter.codeToHtml(code, {
+          lang: language.toLowerCase(),
+          theme: "github-dark",
+        });
+
+        setHighlightedCode(highlighted);
+      } catch (error) {
+        console.error("Failed to highlight code:", error);
+        setHighlightedCode(`<pre><code>${code}</code></pre>`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    highlightCode();
+  }, [code, language]);
+
+  return { highlightedCode, isLoading };
+};
+
+const CodeBlock = ({ code, language }: { code: string; language: string }) => {
+  const { highlightedCode, isLoading } = useHighlightedCode(code, language);
+
+  if (!isLoading) {
+    return <div className="bg-[#0d1117] p-4 rounded-md h-24 animate-pulse" />;
+  }
+
+  return (
+    <div className="p-4 rounded-md overflow-auto text-sm bg-[#0d1117] max-h-[calc(100vh-12rem)] shadow-lg w-full">
+      <div
+        className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0 [&_.shiki]:!bg-transparent"
+        dangerouslySetInnerHTML={{ __html: highlightedCode }}
+      />
+    </div>
+  );
+};
 
 export default function TeamPage() {
   const [team, setTeam] = useState<Team | null>(null);
@@ -272,12 +322,10 @@ export default function TeamPage() {
           <div className="flex flex-col justify-center">
             <button
               onClick={() => {
-                
                 const inviteLink = `${team.teamId}`;
                 navigator.clipboard
                   .writeText(inviteLink)
                   .then(() => {
-                 
                     setIsCopied(true);
                     setTimeout(() => setIsCopied(false), 3000);
                   })
@@ -497,28 +545,54 @@ export default function TeamPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {activeMember ? (
                   codatsData.byMember[activeMember]?.length > 0 ? (
                     codatsData.byMember[activeMember].map((codat) => (
                       <div
                         key={codat.id}
-                        className="bg-[#232842] p-4 rounded-lg hover:bg-[#2a305a] transition cursor-pointer"
+                        className="bg-[#232842] p-5 rounded-lg hover:bg-[#2a305a] transition cursor-pointer shadow-md flex flex-col h-48 border border-[#2d335f]"
                         onClick={() => router.push(`/codat/${codat.id}`)}
                       >
-                        <div className="flex justify-between mb-2">
-                          <span className="font-medium">{codat.title}</span>
-                          <span className="text-xs bg-[#3a4173] px-2 py-1 rounded">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-semibold text-lg text-white truncate pr-2">
+                            {codat.title}
+                          </h3>
+                          <span className="text-xs bg-[#3a4173] px-3 py-1 rounded-full text-blue-100 font-medium">
                             {codat.language}
                           </span>
                         </div>
-                        <div className="text-xs text-gray-400 truncate">
-                          {codat.content?.substring(0, 100)}...
+                        <div className="text-sm text-gray-300 mb-2 flex items-center">
+                          <svg
+                            className="w-4 h-4 mr-1 text-gray-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            ></path>
+                          </svg>
+                          <span>{codat.authorName || "Unknown"}</span>
+                        </div>
+                        <div className="mt-auto">
+                          <div className="overflow-hidden text-sm text-gray-400 line-clamp-3 bg-[#1e2138] p-3 rounded border-l-4 border-blue-500 font-mono">
+                            <CodeBlock
+                              code={
+                                codat.content?.length > 150
+                                  ? codat.content.substring(0, 250) + "..."
+                                  : codat.content || "No Code Available"
+                              }
+                              language={codat.language}
+                            />
+                          </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-400 col-span-2">
+                    <p className="text-gray-400 col-span-2 text-center py-10">
                       No codats available for this member.
                     </p>
                   )
@@ -527,25 +601,41 @@ export default function TeamPage() {
                     codatsData.byCollection[activeCollection].map((codat) => (
                       <div
                         key={codat.id}
-                        className="bg-[#232842] p-4 rounded-lg hover:bg-[#2a305a] transition cursor-pointer"
+                        className="bg-[#232842] p-5 rounded-lg hover:bg-[#2a305a] transition cursor-pointer shadow-md flex flex-col h-48 border border-[#2d335f]"
                         onClick={() => router.push(`/codat/${codat.id}`)}
                       >
-                        <div className="flex justify-between mb-2">
-                          <span className="font-medium">{codat.title}</span>
-                          <span className="text-xs bg-[#3a4173] px-2 py-1 rounded">
+                        <div className="flex justify-between items-center mb-3">
+                          <h3 className="font-semibold text-lg text-white truncate pr-2">
+                            {codat.title}
+                          </h3>
+                          <span className="text-xs bg-[#3a4173] px-3 py-1 rounded-full text-blue-100 font-medium">
                             {codat.language}
                           </span>
                         </div>
-                        <div className="text-gray-400 text-xs mb-2">
-                          By: {codat.authorName || "Unknown"}
+                        <div className="text-sm text-gray-300 mb-2 flex items-center">
+                          <svg
+                            className="w-4 h-4 mr-1 text-gray-400"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                              clipRule="evenodd"
+                            ></path>
+                          </svg>
+                          <span>{codat.authorName || "Unknown"}</span>
                         </div>
-                        <div className="text-xs text-gray-400 truncate">
-                          {codat.content?.substring(0, 100)}...
+                        <div className="mt-auto">
+                          <div className="overflow-hidden text-sm text-gray-400 line-clamp-3 bg-[#1e2138] p-3 rounded border-l-4 border-blue-500 font-mono">
+                            {codat.content?.substring(0, 150)}...
+                          </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <p className="text-gray-400 col-span-2">
+                    <p className="text-gray-400 col-span-2 text-center py-10">
                       No codats available for this collection.
                     </p>
                   )
@@ -553,25 +643,41 @@ export default function TeamPage() {
                   codatsData.allCodats.map((codat) => (
                     <div
                       key={codat.id}
-                      className="bg-[#232842] p-4 rounded-lg hover:bg-[#2a305a] transition cursor-pointer"
+                      className="bg-[#232842] p-5 rounded-lg hover:bg-[#2a305a] transition cursor-pointer shadow-md flex flex-col h-48 border border-[#2d335f]"
                       onClick={() => router.push(`/codat/${codat.id}`)}
                     >
-                      <div className="flex justify-between mb-2">
-                        <span className="font-medium">{codat.title}</span>
-                        <span className="text-xs bg-[#3a4173] px-2 py-1 rounded">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-semibold text-lg text-white truncate pr-2">
+                          {codat.title}
+                        </h3>
+                        <span className="text-xs bg-[#3a4173] px-3 py-1 rounded-full text-blue-100 font-medium">
                           {codat.language}
                         </span>
                       </div>
-                      <div className="text-gray-400 text-xs mb-2">
-                        By: {codat.authorName || "Unknown"}
+                      <div className="text-sm text-gray-300 mb-2 flex items-center">
+                        <svg
+                          className="w-4 h-4 mr-1 text-gray-400"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                        <span>{codat.authorName || "Unknown"}</span>
                       </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {codat.content?.substring(0, 200)}...
+                      <div className="mt-auto">
+                        <div className="overflow-hidden text-sm text-gray-400 line-clamp-3 bg-[#1e2138] p-3 rounded border-l-4 border-blue-500 font-mono">
+                          {codat.content?.substring(0, 150)}...
+                        </div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-gray-400 col-span-2">
+                  <p className="text-gray-400 col-span-2 text-center py-10">
                     No codats available for this team.
                   </p>
                 )}

@@ -135,7 +135,7 @@ const NavbarClient = ({ profile }: { profile: any }) => {
                     ${scrolled ? "text-2xl" : "text-3xl"}`}
           onClick={() => router.push("/")}
         >
-          Codat
+          Codat 
         </div>
 
         {/* Search Bar */}

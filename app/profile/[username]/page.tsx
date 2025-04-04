@@ -1,12 +1,14 @@
 import ProfilePage from "@/components/Pages/ProfilePage";
+import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 const page = async ({ params }: { params: Promise<{ username: string }> }) => {
   const { username } = await params;
-  console.log(username);
+  //console.log(username);
   const usedUsername = decodeURIComponent(username);
+  const currentUser = await currentProfile();
 
   const profile = await db.profile.findUnique({
     where: {
@@ -33,12 +35,10 @@ const page = async ({ params }: { params: Promise<{ username: string }> }) => {
           follower: true,
         },
       },
-
     },
   });
-
-
-
+  //console.log("users following", profile?.usersFollowing);
+  //console.log("users followed", profile?.usersFollowed);
   if (!profile) {
     return <div>Not Found</div>;
   }
@@ -49,6 +49,7 @@ const page = async ({ params }: { params: Promise<{ username: string }> }) => {
       fullcollections={profile.codatsCollections}
       fullFollowers={profile.usersFollowed}
       fullFollowing={profile.usersFollowing}
+      currentUser={currentUser}
     />
   );
 };

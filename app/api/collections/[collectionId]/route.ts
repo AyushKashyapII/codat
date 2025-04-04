@@ -37,7 +37,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{colle
       }
     })
 
-    console.log(codats,"codats")
+    //console.log(codats,"codats")
     
 
     return NextResponse.json(codats, { status: 200 });
