@@ -69,19 +69,70 @@ const useHighlightedCode = (code: string, language: string) => {
   return { highlightedCode, isLoading };
 };
 
-function DisplayAIResponse({ text }) {
+function DisplayAIResponse({ text }: { text: string }) {
   return <ReactMarkdown>{text}</ReactMarkdown>;
 }
 
+const CopyButton = ({ text }: { text: string }) => {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+      });
+  };
+
+  return (
+    <Button 
+      variant="ghost" 
+      onClick={handleCopy}
+      className="h-8 px-3 py-2 text-xs bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors flex items-center gap-1"
+    >
+      {isCopied ? (
+        <>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span>Copied!</span>
+        </>
+      ) : (
+        <>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span>Copy code</span>
+        </>
+      )}
+    </Button>
+  );
+};
+
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { highlightedCode, isLoading } = useHighlightedCode(code, language);
+  const [showCopyButton, setShowCopyButton] = useState(false);
 
   if (isLoading) {
     return <div className="bg-[#0d1117] p-4 rounded-md h-24 animate-pulse" />;
   }
 
   return (
-    <div className="p-4 rounded-md overflow-auto text-sm bg-[#0d1117] max-h-[calc(100vh-12rem)] shadow-lg w-full">
+    <div 
+      className="relative p-4 rounded-md overflow-auto text-sm bg-[#0d1117] max-h-[calc(100vh-12rem)] shadow-lg w-full"
+      onMouseEnter={() => setShowCopyButton(true)}
+      onMouseLeave={() => setShowCopyButton(false)}
+    >
+      {showCopyButton && (
+        <div className="absolute top-4 right-4 z-10">
+          <CopyButton text={code} />
+        </div>
+      )}
       <div
         className="[&_pre]:!bg-transparent [&_code]:!text-[1.1em] [&_.line]:!leading-6 [&_pre]:!p-0 [&_.shiki]:!bg-transparent"
         dangerouslySetInnerHTML={{ __html: highlightedCode }}

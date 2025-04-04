@@ -6,7 +6,6 @@ import axios from "axios";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createHighlighter } from "shiki";
-
 interface TeamMember {
   name: string | null;
   id: string;
@@ -84,7 +83,7 @@ const useHighlightedCode = (code: string, language: string) => {
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   const { highlightedCode, isLoading } = useHighlightedCode(code, language);
 
-  if (!isLoading) {
+  if (isLoading) {
     return <div className="bg-[#0d1117] p-4 rounded-md h-24 animate-pulse" />;
   }
 
@@ -580,13 +579,10 @@ export default function TeamPage() {
                         <div className="mt-auto">
                           <div className="overflow-hidden text-sm text-gray-400 line-clamp-3 bg-[#1e2138] p-3 rounded border-l-4 border-blue-500 font-mono">
                             <CodeBlock
-                              code={
-                                codat.content?.length > 150
-                                  ? codat.content.substring(0, 250) + "..."
-                                  : codat.content || "No Code Available"
-                              }
-                              language={codat.language}
-                            />
+                            code={codat.content}
+                            language={codat.language}/>
+                            {/* {codat.content?.substring(0, 150)}... */}
+
                           </div>
                         </div>
                       </div>
