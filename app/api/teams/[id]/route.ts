@@ -58,6 +58,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{id: s
     if (!team) {
       return NextResponse.json({ error: "team not found" }, { status: 404 })
     }
+
+    console.log("teams",team);
     
     return NextResponse.json(team, { status: 200 });
   } catch (e) {

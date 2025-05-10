@@ -27,6 +27,8 @@ model Codat {
   codatsSavedBy          Profile[]    @relation("CodatSaved")
   codatsCollectionPartOf Collections? @relation("CollectionCodats", fields: [collectionId], references: [collectionId])
   collectionId           String?
+  codatTags              String[]
+  codatLikes             Int          @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -44,6 +46,7 @@ model Teams {
   teamOwner       Profile       @relation("TeamOwner", fields: [teamOwnerId], references: [id], onDelete: Cascade)
   teamModerators  Profile[]     @relation("TeamModerators")
   teamCollections Collections[] @relation("TeamCollections")
+  teamImage       String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -59,7 +62,7 @@ model Collections {
   collectionOwner      Profile @relation("CollectionOwner", fields: [collectionOwnerId], references: [id], onDelete: Cascade)
   collectionOwnerId    String
   collectionCodats     Codat[] @relation("CollectionCodats")
-  collectionColor      String?
+  collectionColor      String? @default("#000000")
   collectionTeamPartOf Teams[] @relation("TeamCollections")
 
   createdAt DateTime @default(now())
@@ -70,20 +73,21 @@ model Collections {
 }
 
 model Profile {
-  id                 String        @id @default(uuid())
-  email              String        @unique
-  phoneNumber        String?       @unique
-  name               String?       @unique @default("Codat Profile")
-  image              String?       @db.Text
-  attachedAiSearcher AiSearcher?   @relation("AiSearcher")
-  teamsPartsOf       Teams[]       @relation("TeamMembers")
-  teamsOwnerOf       Teams[]       @relation("TeamOwner")
-  teamsModeratorOf   Teams[]       @relation("TeamModerators")
-  codatsAuthored     Codat[]       @relation("CodatAuthor")
-  codatsSaved        Codat[]       @relation("CodatSaved")
-  codatsCollections  Collections[] @relation("CollectionOwner")
-  password           String?
-  token              String?       @unique @default(uuid())
+  id                 String      @id @default(uuid())
+  email              String      @unique
+  phoneNumber        String?     @unique
+  name               String?     @unique @default("Codat Profile")
+  image              String?     @db.Text
+  attachedAiSearcher AiSearcher? @relation("AiSearcher")
+  teamsPartsOf       Teams[]     @relation("TeamMembers")
+  teamsOwnerOf       Teams[]     @relation("TeamOwner")
+  teamsModeratorOf   Teams[]     @relation("TeamModerators")
+  codatsAuthored     Codat[]     @relation("CodatAuthor")
+  codatsSaved        Codat[]     @relation("CodatSaved")
+
+  codatsCollections Collections[] @relation("CollectionOwner")
+  password          String?
+  token             String?       @unique @default(uuid())
 
   usersFollowed  UserFollow[] @relation("UserFollowing")
   usersFollowing UserFollow[] @relation("UserFollowed")

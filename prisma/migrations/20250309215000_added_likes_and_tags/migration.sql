@@ -2,7 +2,6 @@
   Warnings:
 
   - You are about to drop the `_TeamCodats` table. If the table is not empty, all the data it contains will be lost.
-  - Added the required column `collectionColor` to the `Collections` table without a default value. This is not possible if the table is not empty.
 
 */
 -- DropForeignKey
@@ -12,7 +11,8 @@ ALTER TABLE "_TeamCodats" DROP CONSTRAINT "_TeamCodats_A_fkey";
 ALTER TABLE "_TeamCodats" DROP CONSTRAINT "_TeamCodats_B_fkey";
 
 -- AlterTable
-ALTER TABLE "Collections" ADD COLUMN     "collectionColor" TEXT NOT NULL;
+ALTER TABLE "Codat" ADD COLUMN     "codatLikes" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "codatTags" TEXT[];
 
 -- DropTable
 DROP TABLE "_TeamCodats";

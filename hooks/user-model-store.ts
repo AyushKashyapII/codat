@@ -9,6 +9,8 @@ interface Codat {
   codatIsPublic: boolean;
   codatAIDesc: string;
   codatAIFunc: string;
+  codatTags:string[];
+  codatLikes: number;
   createdAt: Date;
   updatedAt: Date;
   codatAuthor: {
@@ -64,7 +66,7 @@ interface Profile {
   teamsModeratorOf: Teams[];
   codatsAuthored: Codat[];
   codatsSaved: Codat[];
-  codatsCollections: AllCollections[];
+  codatsCollections: Collection[];
   usersFollowed: UserFollow[];
   usersFollowing: UserFollow[];
 }

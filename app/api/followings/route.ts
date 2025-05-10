@@ -29,7 +29,7 @@ export async function GET() {
         }
       }
     })
-
+    console.log("followings",followings)
     return NextResponse.json(followings, { status: 200 });
   } catch (e) {
     return NextResponse.json(

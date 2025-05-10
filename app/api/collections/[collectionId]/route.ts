@@ -19,20 +19,26 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{colle
       select: {
         collectionName: true,
         collectionDesc: true,
+        collectionColor:true,
         collectionCodats: {
           select: {
             codatName: true,
             codatId: true,
             codatDescription: true,
+            codatAIDesc:true,
             codatLanguage: true,
             codatAuthor:true,
             codatCode:true,
+            codatLikes:true,
             createdAt: true,
             updatedAt: true,
           }
         },
       }
     })
+
+    //console.log(codats,"codats")
+    
 
     return NextResponse.json(codats, { status: 200 });
   } catch (e) {

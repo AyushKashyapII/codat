@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.cl-userButtonPopoverFooter,
+.cl-internal-d50gl1 {
+  display: none !important;
+}
+.cl-internal-1dauvpw {
+  opacity: 0;
+}
+
 @keyframes slideInTop {
   from {
     opacity: 0;
